@@ -1,0 +1,1087 @@
+:root {
+  --paper: #F6F7F8;       /* was #f7f6f2 */
+  --card: #ffffff;
+  --ink: #1B1E22;          /* was #1e2530 */
+  --ink-soft: #5B6470;     /* was #5a6472 */
+  --rule: #C9CDD1;         /* was #d8d5cc */
+  --accent: #2f5d8a;       /* was #2f5d8a — Bonavista steel blue #2B5A76 */ 
+  --accent-soft: #E7EEF3;  /* was #e6edf4 */
+  --warn-bg: #f6ead8;
+  --warn-ink: #7a4a12;
+  --override: #fff4d6;
+  --override-ink: #7a5a12;
+  --navy: #10254A;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", "Menlo", monospace;
+  --sans: ui-sans-serif, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 13px; }
+/* F-layout: a fixed-width left sidebar (navigation + mode-independent controls) and a
+   flexible content area (mode-specific controls + that mode's view) — see index.html's
+   structural comment and app.js's showView().
+
+   .wrap is a FIXED-HEIGHT shell (100vh), not a normally-scrolling page — sidebar and
+   context toolbar are simply never in a scrolling ancestor at all, so there's nothing
+   for them to need position:sticky FOR. Only .view (below) scrolls, internally, via
+   its own overflow-y:auto. This replaced an earlier position:sticky attempt: sticky
+   elements inside this flex/padding shell had a real, reproducible bug — scrolled
+   report content became visible ABOVE the sticky header, in the gap between the
+   browser's own chrome and wherever the header had stuck — that a z-index/stacking-
+   context fix (isolation:isolate) did NOT resolve, meaning the cause wasn't (only)
+   stacking order. Fixed-height shell + internal scroll pane is the standard, more
+   robust pattern for "pinned chrome + scrolling content" — it sidesteps the whole
+   class of sticky-inside-flexbox edge cases rather than chasing this one further. */
+.wrap {
+  max-width: 1300px; margin: 0 auto; padding: 20px; height: 100vh; overflow: hidden;
+  display: flex; gap: 20px; align-items: flex-start;
+}
+
+/* ---- Sidebar ---- */
+/* No longer position:sticky — .wrap itself never scrolls (see above), so the sidebar
+   is simply always visible without needing to "stick" to anything. overflow-y:auto is
+   a defensive fallback only, in case its own content ever exceeds the viewport height
+   (not expected given how little it holds today). */
+.sidebar {
+  flex: 0 0 200px; display: flex; flex-direction: column; gap: 14px; max-height: 100%; overflow-y: auto;
+  background: var(--paper);
+  padding: 12px;
+  border-radius: 6px;
+}
+.sidebar-group {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+}
+.sidebar-group label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.sidebar-group select {
+  font-family: var(--sans); font-size: 12.5px; padding: 6px 8px; border-radius: 4px;
+  border: 1px solid var(--ink); background: var(--card); color: var(--ink);
+}
+.sidebar-group .status { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+.sidebar-group button {
+  font-family: var(--sans); font-size: 12.5px; padding: 8px 10px; border-radius: 4px;
+  border: 1px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer;
+}
+.sidebar-group button:hover { background: var(--ink); color: var(--paper); }
+.sidebar-group button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sidebar-group button.primary:hover { background: #244a6f; }
+
+/* Mode switch — a vertical nav list here (was a horizontal tab row above the content
+   before the F-layout), same .view-switch class/button structure app.js already
+   selects by, only the visual treatment changes. */
+.sidebar-group.view-switch { padding: 6px; gap: 2px; }
+.sidebar-group.view-switch button {
+  border: none; border-radius: 4px; background: transparent; color: var(--ink-soft);
+  text-align: left; padding: 9px 10px; font-size: 13px; font-family: var(--sans); cursor: pointer;
+}
+.sidebar-group.view-switch button:hover { background: var(--accent-soft); color: var(--accent); }
+.sidebar-group.view-switch button.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+/* Standard sub-menu look — shared by TWO separate elements, each independently
+   toggled by app.js's showView: #standardSwitch (expands under "Report", the 4 real
+   standards) and #auditSwitch (expands under "Audit Trail", the same 4 standards
+   plus "Data File Explorer" — see index.html's own comments on each). Indented +
+   smaller to read as a child of whichever button it's currently expanding under,
+   not a sibling mode. */
+.standard-switch { display: none; flex-direction: column; gap: 2px; margin: 2px 0 2px 14px; }
+.standard-switch.active { display: flex; }
+.standard-switch button {
+  border: none; border-radius: 4px; background: transparent; color: var(--ink-soft);
+  text-align: left; padding: 7px 10px; font-size: 12px; font-family: var(--sans); cursor: pointer;
+  border-left: 2px solid var(--rule);
+}
+.standard-switch button:hover { background: var(--accent-soft); color: var(--accent); }
+.standard-switch button.active { border-left-color: var(--accent); color: var(--accent); font-weight: 600; background: var(--accent-soft); }
+/* A loaded file whose TestType doesn't match this standard (app.js's
+   updateStandardCompatibility) — grayed out, title tooltip explains why, but still
+   present rather than removed (per the user: give an indication of the RIGHT
+   standard without hiding the others). :disabled:hover repeats the flat look so
+   hovering a disabled button doesn't suggest it's clickable. */
+.standard-switch button:disabled,
+.standard-switch button:disabled:hover {
+  opacity: 0.45; cursor: not-allowed; background: transparent; color: var(--ink-soft);
+}
+
+/* ---- Content area: per-mode context toolbar + that mode's view ----
+   A flex COLUMN filling .wrap's full height: the active .context-toolbar keeps its
+   natural size (flex-shrink:0) at the top, and .view.active fills whatever's left
+   and scrolls internally (see .view below) — the actual fix for the report-scrolls-
+   above-the-header bug (see .wrap's note above). */
+.content { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Narrow viewport: stack the sidebar above the content instead of beside it, and fall
+   back to the page itself scrolling normally (this fixed-height/internal-scroll shell
+   is a desktop-width refinement) — this app has no broader responsive/mobile design
+   to preserve beyond this, a simple fallback so the F-layout doesn't break down to
+   unusably narrow columns, not a full pass. */
+@media (max-width: 720px) {
+  html, body { height: auto; }
+  .wrap { flex-direction: column; height: auto; overflow: visible; }
+  .sidebar { flex: 1 1 auto; width: 100%; max-height: none; overflow: visible; }
+  .sidebar-group.view-switch { flex-direction: row; }
+  .content { height: auto; overflow: visible; }
+}
+
+/* .toolbar: the visual chrome (card/flex row) reused by each mode's own
+   .context-toolbar (index.html) — .context-toolbar itself only controls show/hide,
+   toggled by app.js's showView() the same way .view/.view.active already works. */
+.toolbar {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 14px; margin-bottom: 16px;
+}
+.toolbar .group { display: flex; gap: 6px; align-items: center; }
+.toolbar .divider { width: 1px; align-self: stretch; background: var(--rule); margin: 0 4px; }
+.toolbar label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.toolbar select, .toolbar button, button.act {
+  font-family: var(--sans); font-size: 12.5px; padding: 5px 10px; border-radius: 4px;
+  border: 1px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer;
+}
+.toolbar button:hover, button.act:hover { background: var(--ink); color: var(--paper); }
+.toolbar button.primary, button.act.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.toolbar button.primary:hover { background: #244a6f; }
+.toolbar button.warn-btn { background: var(--warn-bg); border-color: #e0c79a; color: var(--warn-ink); }
+.toolbar button.warn-btn:hover { background: #e0c79a; color: var(--warn-ink); }
+.toolbar .status { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); margin-left: auto; }
+
+.context-toolbar { display: none; }
+/* No longer position:sticky (see .wrap's note above) — just a normal flex child at
+   the top of .content's column. flex-shrink:0 keeps it at its natural height instead
+   of getting squeezed as .view (below) claims the rest of the column. */
+.context-toolbar.active { display: flex; flex-shrink: 0; }
+/* hint-full: inside a .context-toolbar (a flex row), forces the explanatory text onto
+   its own full-width line below the buttons/groups instead of squeezing into the row. */
+.hint-full { flex-basis: 100%; margin-top: 4px; }
+
+.view { display: none; }
+/* The actual scrolling pane: fills whatever height .content has left below the
+   context toolbar, and scrolls internally — this (not position:sticky on the header)
+   is what keeps the sidebar/context-toolbar always visible while a long report
+   scrolls. padding-bottom replaces .wrap's old bottom padding, now that .wrap itself
+   doesn't scroll or have breathing room of its own below the fold. */
+.view.active { display: block; flex: 1; overflow-y: auto; padding-bottom: 40px; }
+
+/* .hint: general small-muted-text utility, used standalone in modals too (e.g.
+   iso454812DisplaySizesView.js). */
+.hint { color: var(--ink-soft); font-size: 12px; }
+
+/* ---- Explorer view ---- */
+.meta {
+  display: flex; flex-wrap: wrap; gap: 4px 28px; align-items: baseline;
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 14px; margin-bottom: 14px; font-family: var(--mono); font-size: 13px;
+}
+.meta .k { color: var(--ink-soft); font-family: var(--sans); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 6px; }
+.warnings { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid #e0c79a; border-radius: 6px;
+  padding: 8px 12px; margin-bottom: 14px; font-size: 13px; }
+.warnings div + div { margin-top: 4px; }
+
+.tabs { display: flex; gap: 2px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); }
+.tabs button { border: 1px solid var(--rule); border-bottom: none; border-radius: 6px 6px 0 0;
+  background: #edeae2; color: var(--ink-soft); padding: 7px 14px; font-size: 13px; cursor: pointer; }
+.tabs button.active { background: var(--card); color: var(--ink); font-weight: 600;
+  border-color: var(--ink); position: relative; top: 2px; padding-bottom: 9px; }
+.panel { background: var(--card); border: 1px solid var(--rule); border-top: none;
+  border-radius: 0 0 6px 6px; padding: 14px; }
+.panel-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.panel-tools .count { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin-left: auto; }
+
+.tblwrap { overflow: auto; max-height: 60vh; border: 1px solid var(--rule); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 12.5px; }
+th, td { padding: 4px 10px; border-bottom: 1px solid #eceae3; white-space: nowrap; text-align: right; }
+th { position: sticky; top: 0; background: var(--ink); color: var(--paper);
+  font-family: var(--sans); font-size: 11.5px; font-weight: 600; z-index: 1; }
+td:first-child, th:first-child { text-align: left; }
+tbody tr:nth-child(even) { background: #fafaf6; }
+tbody tr:hover { background: var(--accent-soft); }
+.hdr-section { margin-bottom: 18px; }
+.hdr-section h3 { font-size: 13px; margin: 0 0 6px; text-transform: uppercase; color: var(--accent); }
+.hdr-section table { width: auto; min-width: 320px; }
+.hdr-section td:first-child { font-family: var(--sans); font-weight: 600; }
+
+/* ---- Report view ----
+   Every standard's pages render concatenated in one scroll, not one-at-a-time behind
+   a page picker — .report-page is now a CLASS (each template's own wrapping element
+   carries it), not an id, since multiple pages of the same standard sit in the DOM at
+   once. On screen, a margin + dashed border between blocks reads as "next sheet"; at
+   print time that becomes a real page-break (see the @media print rule below). */
+.report-page { background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 22px 26px; font-size: 12.5px; line-height: 1.5; margin-bottom: 22px; position: relative; }
+.report-page h1 { font-size: 16px; text-align: center; margin: 0 0 14px; }
+/* Company letterhead (companyLogoStore.js / reportView.js's applyCompanyLogo).
+   PRINT ONLY (2026-09-09, per the user) — hidden on screen entirely, not just styled
+   differently: the screen preview's .report-page is a plain auto-height card with no
+   equivalent of print's page-bottom margin (see the min-height rule below, which is
+   itself print-only), so a screen version of this same bottom placement sat right on
+   top of real content instead of below it. Making the screen layout truly match print
+   would mean reserving that same margin on screen too — not worth the added layout
+   complexity for a preview that isn't the actual deliverable; print output is. */
+.report-logo { display: none; }
+.report-page h2 { font-size: 12.5px; text-transform: uppercase; background: var(--navy); color: var(--paper);
+  margin: 18px 0 8px; padding: 4px 8px; border-radius: 3px; }
+.report-page h3 { font-size: 12px; font-weight: 700; margin: 10px 0 4px; color: var(--accent); }
+/* Indent whatever falls under an h3 subheading (Test Fluid, Test Dust, Differential
+   Pressure, ...) so the DATA reads as clearly subordinate to it, not flush with it —
+   a general sibling selector (h3 ~ X), not a wrapping container: every section that
+   has NO h3 (Test/Filter Identification) happens to come before the first h3 in
+   these templates, so this naturally only catches what should be indented, with no
+   extra class needed to opt in or out. Tables need width reduced to match, or the
+   added margin would push them past the page's right edge; .field-row/.comments-box
+   are auto-width blocks, so margin alone already narrows them correctly. */
+h3 ~ .field-row { margin-left: 20px; }
+h3 ~ .comments-box { margin-left: 20px; }
+h3 ~ table.datatbl { margin-left: 20px; width: calc(100% - 20px); }
+.field-row { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-bottom: 5px; }
+.field { display: flex; gap: 5px; align-items: baseline; min-width: 190px; flex: 1; }
+.field .lbl { color: var(--ink-soft); white-space: nowrap; }
+.field .val { font-family: var(--mono); border-bottom: 1px solid var(--rule); flex: 1; padding: 0 2px 1px; min-height: 1.3em; }
+.field .unit { color: var(--ink-soft); white-space: nowrap; font-size: 11px; }
+.val.overridden { background: var(--override); color: var(--override-ink); border-radius: 2px; }
+/* .field-warn: inline ⚠ marker reportView.js's applyControlWarningMarkers appends next
+   to a report field whose control-target rule failed — see warningsDialogView.js for
+   the full-detail counterpart these markers point back to. */
+.field-warn { color: var(--warn-ink); cursor: help; margin-left: 2px; }
+/* .field-info: static ⓘ hint next to a report field — same inline/title-tooltip
+   shape as .field-warn just above (native title attribute, no JS/framework), just
+   neutral-colored and written directly in a template rather than JS-inserted, since
+   it's a fixed explanation of the field itself, not conditional on computed state.
+   Screen-only: a hover tooltip means nothing on paper, so hidden in print (below). */
+.field-info { color: var(--accent); cursor: help; margin-left: 2px; font-size: 12px; }
+/* .report-note: shared, standard-agnostic utility — pair with .hint for the actual
+   look (e.g. class="hint report-note"); this class ONLY adds the collapse-when-blank
+   behavior, for a conditional note next to a report field (e.g. why Non-Retained Mass
+   isn't computed for a non-standard test type) — the WHEN/WHY is each standard's own
+   Mapper content, this is only the rendering. `:empty` (no child nodes at all, which
+   an el.textContent = "" produces) collapses it to nothing rather than an empty line,
+   so a normal Multipass report shows no trace of it without any JS toggle needed. */
+.report-note:empty { display: none; }
+/* .rpt-slot-hidden: shared, standard-agnostic utility (belongs here, not duplicated
+   per standard — it's a UI concern, not an analysis procedure) for the "static
+   template always has every possible column/clump slot; hide the ones this file
+   doesn't use" pattern — ISO16889 Page 2, Table B.2, and ISO19438's clump pages
+   all toggle this on a cell or a whole clump-slot wrapper via a count the app
+   already knows exactly (how many sizes are selected, how many clumps remain on a
+   page), never a runtime measurement. */
+.rpt-slot-hidden { display: none; }
+table.datatbl { border-collapse: collapse; width: 100%; margin: 6px 0 4px; font-family: var(--mono); font-size: 12px; }
+table.datatbl th, table.datatbl td { border: 1px solid var(--rule); padding: 3px 7px; text-align: center; }
+/* A td/th with NO text node forms no line box at all, so an empty cell's row
+   collapses to just its padding — a real row (even one with only SOME blank
+   cells) is saved by a sibling cell that has content, but a row that's blank
+   ACROSS EVERY column (every no-file placeholder row reportView.js renders) has
+   no such sibling and visibly shrinks. Same fix as .field .val's min-height just
+   above, applied to table cells instead: a genuinely-empty cell gets an invisible
+   &nbsp; via generated content, giving it the same line box (and so the same row
+   height) a populated cell would have, without changing its actual textContent. */
+table.datatbl td:empty::after, table.datatbl th:empty::after { content: "\00a0"; }
+/* white-space: normal overrides the Explorer's bare "th, td { white-space: nowrap }"
+   (line ~172, meant for .tblwrap's own tables) which otherwise leaks into every
+   report table's headers too — harmless for the short 1-2 word headers most report
+   tables use, but forces a long multi-word header (ISO 3968's Page 2, 7 columns)
+   onto one un-wrapping line, blowing the table out wide. */
+table.datatbl th { background: var(--accent-soft); color: var(--ink); font-family: var(--sans); font-weight: 600; text-align: center; white-space: normal; }
+table.datatbl td:first-child, table.datatbl th:first-child { text-align: center; }
+.betarow { text-align: center; }
+
+/* The Overall Filter Efficiency block is TWO stacked 8-size tables (sizes 1-8 above,
+   9-16 below). With auto table layout each sizes its own columns to its own content,
+   so the top and bottom rows of numbers didn't line up. table-layout:fixed + an
+   identical first-column width makes both tables share one column geometry, so every
+   column lines up vertically between the two. Applied only to .eff-table, so the
+   %-net-ΔP and micrometer tables (different column counts) keep their own sizing. */
+table.eff-table { table-layout: fixed; }
+table.eff-table th:first-child, table.eff-table td:first-child { width: 18%; }
+/* Particle size row's values (thead td.betarow) bolded to match their own row's <th>
+   label ("Particle size", font-weight 600 via table.datatbl th above) — the Max/Min/
+   Overall data rows below (tbody td.betarow) are untouched, this is size labels only. */
+table.eff-table thead td.betarow { font-weight: 600; }
+.comments-box { border: 1px solid var(--rule); border-radius: 3px; min-height: 2.4em; font-family: var(--mono); padding: 4px 6px; margin-top: 4px; }
+
+.footer-note { color: var(--ink-soft); font-size: 12px; margin-top: 14px; }
+
+/* ---- Table B.2 (ISO 4548-12 per-bucket efficiency) / ISO 19438's per-window pages
+   ("Presentation of Test Results") — same visual treatment, two different tables.
+   Each B.2 sheet is a cloned .b2-page (see iso454812_page2.html's <template>) holding
+   one .b2-table; reportView.js's fillTableB2Pages appends one <tbody class="b2-clump">
+   per bucket. ISO 19438's .w19438-table/.w19438-clump (iso19438_page2.html /
+   fillTable19438Pages) share every one of these rules — grouped selectors below, not
+   a second copy of each rule, since this is shared VISUAL styling (a helper concern),
+   not an analysis procedure; the two standards' underlying clump DATA/labels are
+   still built by fully separate, non-shared code (reportView.js's two regions). The
+   border-top on each clump's meta row is the "thin line around subsections"
+   separator — simpler and more reliably rendered across browsers than a border drawn
+   on <tbody> itself. */
+.b2-table, .w19438-table { font-family: var(--mono); font-size: 11.5px; }
+.b2-table th, .b2-table td, .w19438-table th, .w19438-table td { text-align: center; }
+.b2-table td:first-child, .b2-table th:first-child,
+.w19438-table td:first-child, .w19438-table th:first-child { text-align: left; white-space: nowrap; }
+.b2-table .b2-meta td, .w19438-table .w19438-meta td { text-align: left; background: var(--accent-soft); font-weight: 600;
+  border-top: 2px solid var(--ink); }
+/* b2-block2: the second 8-size block's first row (sizes 9-16) within a clump — same
+   "darker line = subsection start" convention as .b2-meta above, so the two 8-size
+   blocks read as visually distinct groups instead of one undifferentiated run of 8
+   rows. */
+.b2-table .b2-block2 th, .b2-table .b2-block2 td,
+.w19438-table .b2-block2 th, .w19438-table .b2-block2 td { border-top: 2px solid var(--ink); }
+/* b2-size-row: the size-label values bolded to match their own row's <th> ("Particle
+   size", font-weight 600 via table.datatbl th above) — the Upstream/Downstream/
+   Efficiency data rows below are untouched, this is size labels only. */
+.b2-table .b2-size-row td, .w19438-table .b2-size-row td { font-weight: 600; }
+.b2-table tbody.b2-clump, .w19438-table tbody.w19438-clump { break-inside: avoid; page-break-inside: avoid; }
+.b2-table .b2-spacer td, .w19438-table .b2-spacer td { height: 10px; border-left: none; border-right: none; }
+/* Extra-tall spacer specifically after ISO 19438's Initial clump — see
+   reportView.js's fill19438Clump note on why it reads better set apart. */
+.w19438-table .w19438-spacer-after-initial td { height: 26px; border-bottom: 2px solid var(--ink); }
+
+/* b2-meta-row: label / elapsed time / ΔP inside one meta <td>. A 3-column grid, not
+   flex+space-between — space-between only pins the outer two items to the edges, the
+   middle one lands wherever its own width happens to put it, not at the true center. */
+.b2-meta-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0 12px; }
+.b2-meta-row .b2-meta-left { text-align: left; }
+.b2-meta-row .b2-meta-center { text-align: center; }
+.b2-meta-row .b2-meta-right { text-align: right; }
+
+/* ---- ISO 16889:2022 Page 2 (particle counts / filtration ratio) ----
+   One column per display size (not two) and Up/Down/ß as three stacked rows per
+   clump — 18 total columns for all 16 sizes at once (16 + 2 label columns: percent
+   and Up/Down/ß), matching the reference workbook layout the user provided.
+   .w16889-p2-scroll gives the table its own horizontal scrollbar ON SCREEN as a
+   belt-and-suspenders fallback — but overflow-x:auto is turned OFF again for print
+   below, see that rule for why.
+
+   .w16889-size-col-group (on the <col> elements in iso16889_page2.html's
+   <colgroup>) only takes effect once table-layout:fixed is set, in print below —
+   under the default auto layout (here, on screen), <col> widths are just hints a
+   browser can override for content, so this doesn't change anything on screen. */
+.w16889-p2-scroll { overflow-x: auto; }
+.w16889-p2-table { font-family: var(--mono); font-size: 10px; border-collapse: collapse; width: 100%; }
+.w16889-p2-table th, .w16889-p2-table td { border: 1px solid var(--rule); padding: 2px 5px; text-align: center; white-space: nowrap; }
+.w16889-p2-table thead th { background: var(--accent-soft); font-family: var(--sans); font-weight: 600; }
+.w16889-avg-row th, .w16889-avg-row td { font-weight: 600; background: #fbfaf7; }
+.w16889-size-col-group { width: 5.5%; }
+
+/* A small visual break between each percentage group (10%, 20%, ... 100%, Avg.) —
+   reported as hard to follow row-to-row otherwise, all 3-row groups running
+   together with no separation. table.datatbl's own border-collapse means a real
+   gap (margin) between rows isn't possible without inserting spacer rows (the
+   Table B.2/ISO 19438 pattern, app.css's .b2-spacer) — this table's rows are ALL
+   already static/fixed per its own template header comment, so a heavier top
+   border + a little extra top padding is the smaller, row-count-preserving way to
+   get the same "group boundary" read, same emphasis convention
+   .w19438-spacer-after-initial already uses elsewhere (2px solid var(--ink)) for
+   the identical purpose. [data-row$="-up"] catches every group's first row
+   (10-up..100-up, avg-up) — "initial" has no such suffix, correctly getting no
+   divider since nothing meaningful sits above it but the header.
+   This page's print sizing is a documented hard limit elsewhere in this file
+   (.w16889-p2-page's own overflow:hidden has silently clipped rows before) — this
+   rule is deliberately NOT screen-only despite the small risk, because re-measured
+   against the real template + real app.css via tools/render-check/shot-p2.js
+   (ROTest9-MP.DAT, letter paper, 2026-08-06) confirms it still fits with all 16
+   columns and all 12 groups fully visible, no clipping. Re-run that tool if this
+   rule's numbers ever change. */
+.w16889-p2-table tr[data-row$="-up"] th, .w16889-p2-table tr[data-row$="-up"] td { border-top: 2px solid var(--ink); padding-top: 6px; }
+
+/* Landscape print via rotation, not CSS named pages (see iso16889_page2.html's own
+   header comment for the full rationale — named-page orientation switching was
+   tried first and confirmed by a real print not to work at all).
+
+   .w16889-p2-page is sized to the PORTRAIT page's own usable content area (i.e.
+   app.css's @page margin already subtracted, same numbers reportView.js's
+   PAGE_MARGIN_IN/PAPER_WIDTH_IN use for figure sizing — kept in sync BY HAND with
+   those, same convention as .single-fig/.double-fig's own print heights below).
+   .w16889-p2-rotate is sized to those same two dimensions SWAPPED (the landscape
+   footprint) and rotated into the portrait box: rotate(90deg) around the top-left
+   corner swings the box up and to the left of the origin, and translateY(-100%)
+   (evaluated BEFORE the rotate, since CSS applies transform functions right-to-
+   left) shifts it back so the rotated box's visible area exactly fills
+   .w16889-p2-page's own (0,0)-origin box — the standard "rotate a content block for
+   sideways print" trick, built from plain transform/position rather than any
+   Paged-Media-specific feature. Screen rendering is completely untouched — this
+   entire block is print-only.
+
+   .w16889-p2-scroll's overflow-x:auto (screen-only fallback above) MUST be turned
+   off here — a real print confirmed that a scrollable overflow container gets
+   printed as a CLIPPED VIEWPORT, showing only whatever was scrolled into view (the
+   leftmost ~13 of 16 size columns) with a scrollbar rendered onto the page instead
+   of the remaining columns. There is no "scrolling" on a printed page, so this
+   container must lay out at its full natural width instead — .w16889-p2-page's own
+   overflow:hidden is the real (and only) backstop if the table is ever still too
+   wide for the rotated footprint. */
+@media print {
+  .w16889-p2-page {
+    position: relative;
+    overflow: hidden;
+    width: 7.5in;   /* letter: 8.5in - 0.5in - 0.5in usable width */
+    height: 10in;   /* letter: 11in - 0.5in - 0.5in usable height */
+  }
+  body[data-paper="a4"] .w16889-p2-page {
+    width: 7.27in;  /* a4: 8.27in - 0.5in - 0.5in */
+    height: 10.69in;/* a4: 11.69in - 0.5in - 0.5in */
+  }
+  .w16889-p2-rotate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10in;    /* letter usable height, becomes visual width after rotation */
+    height: 7.5in;  /* letter usable width, becomes visual height after rotation */
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100%);
+  }
+  body[data-paper="a4"] .w16889-p2-rotate { width: 10.69in; height: 7.27in; }
+  .w16889-p2-scroll { overflow: visible; }
+}
+
+/* ---- ISO 23369:2022 Page 2 (particle counts / filtration ratio) ----
+   Own copy of the ISO 16889 Page 2 block above, per CLAUDE.md — this standard's own
+   outline states Page 2 "directly mirrors ISO 16889's page 2," so the table is the
+   identical 18-column x 34-row shape, and every print-fit number below is the SAME
+   hard-won value (own copy, not shared — happens to agree because the table shape
+   agrees, not because either depends on the other). See the ISO 16889 block's own
+   comments for the full rationale (why table-layout:fixed + <colgroup> is a
+   structural guarantee, why the rotate trick instead of CSS named pages, why
+   overflow-x:auto must be off for print). Re-measure via tools/render-check if this
+   standard's own page-2 content ever diverges from an exact structural mirror. */
+.w23369-p2-scroll { overflow-x: auto; }
+.w23369-p2-table { font-family: var(--mono); font-size: 10px; border-collapse: collapse; width: 100%; }
+.w23369-p2-table th, .w23369-p2-table td { border: 1px solid var(--rule); padding: 2px 5px; text-align: center; white-space: nowrap; }
+.w23369-p2-table thead th { background: var(--accent-soft); font-family: var(--sans); font-weight: 600; }
+.w23369-avg-row th, .w23369-avg-row td { font-weight: 600; background: #fbfaf7; }
+.w23369-size-col-group { width: 5.5%; }
+.w23369-p2-table tr[data-row$="-up"] th, .w23369-p2-table tr[data-row$="-up"] td { border-top: 2px solid var(--ink); padding-top: 6px; }
+
+@media print {
+  .w23369-p2-page {
+    position: relative;
+    overflow: hidden;
+    width: 7.5in;
+    height: 10in;
+  }
+  body[data-paper="a4"] .w23369-p2-page {
+    width: 7.27in;
+    height: 10.69in;
+  }
+  .w23369-p2-rotate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10in;
+    height: 7.5in;
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100%);
+  }
+  body[data-paper="a4"] .w23369-p2-rotate { width: 10.69in; height: 7.27in; }
+  .w23369-p2-scroll { overflow: visible; }
+}
+
+/* ---- Charts (used both by custom plot tabs and print) ----
+   <canvas> is a DIRECT child of .chart-wrap, deliberately — Chart.js's responsive
+   resizing measures the canvas's own immediate parent, and that parent needs an
+   EXPLICIT height (the height rules below/in @media print), not a computed
+   percentage one. An earlier version of this axis-editing feature wrapped the canvas
+   in an intermediate .chart-canvas-box (width/height:100%) so it could share a flex
+   row with the "Edit Chart" button; that percentage-height indirection reintroduced
+   the EXACT print-timing bug this project had already hit and fixed once before (see
+   app.js's redrawForPrint note: "figures visibly not filling anywhere near the
+   printed page's height") — a percentage height depends on its ancestor's height
+   having already resolved in the SAME layout pass Chart.js reads from, one more
+   thing that can lose the print-reflow timing race the direct/explicit-height
+   version doesn't have to run at all. Removed once the button became a
+   position:absolute overlay (below) and no longer needed to share the box with the
+   canvas in the first place. */
+.chart-wrap {
+  position: relative; height: 55vh; background: var(--card); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 10px; margin-top: 10px;
+}
+/* A small square icon button (pencil glyph, see chartAxisControls.js) floating over
+   the plot's lower-right corner, not a wide text-label button beside it — that read
+   as visually enlarging the plot area next to it, which is the opposite of the point. */
+.edit-chart-btn {
+  position: absolute; right: 14px; bottom: 14px; z-index: 2;
+  width: 26px; height: 26px; padding: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 14px; line-height: 1;
+}
+
+/* ---- Chart axis editor (chartAxisControls.js) ----
+   The panel (X min/max, Y min/max, Preview/Save/Revert) IS .axis-controls — shown/
+   hidden by chartAxisControls.js directly (inline style), not a CSS class. Button
+   styling (including .edit-chart-btn above) comes for free from the existing .toolbar
+   select, .toolbar button, button.act rule (class="act"/"act primary" matches
+   regardless of ancestor), so nothing is redefined here. */
+.axis-controls {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px;
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px;
+}
+.axis-controls .group { display: flex; gap: 6px; align-items: center; }
+.axis-controls label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.05em; }
+.axis-controls input[type="number"] {
+  width: 84px; padding: 5px 7px; border-radius: 4px; border: 1px solid var(--ink);
+  background: var(--card); color: var(--ink); font-family: var(--sans); font-size: 12.5px;
+}
+
+/* ---- Report figures (ISO 4548-12 Figures B.1-B.3) ----
+   Each .figure-wrap gets an EXPLICIT height rather than flex-filling its page. A prior
+   version made .figure-page a flex column with height:8.9in and the wrap flex:1, but
+   in print the figure-page's height wasn't resolving, so the wraps only grew to their
+   content and left the bottom of the sheet blank. An explicit block height on the wrap
+   itself doesn't depend on any ancestor's height resolving — it just applies — so the
+   chart (which fills its container) reliably reaches the intended size. Heights differ
+   by how many figures share the sheet: .single-fig (Figure B.1 alone) gets a tall wrap;
+   .double-fig (Figures B.2 + B.3 stacked) gets two shorter wraps that together fill the
+   page. .figure-wrap must out-specify .chart-wrap's 55vh, which the two-class selectors
+   below do. */
+.single-fig .figure-wrap { height: 640px; margin: 10px 0 4px; }
+/* Full page width (matching Figure B.1's width on the preceding page), just taller —
+   an earlier version capped this at a squarer max-width instead, which actually made
+   it read as SMALLER (narrower AND no taller), the opposite of the goal. See the
+   print rule below for the actual page-budget math this height is bounded by. */
+.double-fig .figure-wrap { height: 400px; margin: 10px 0 4px; }
+.figure-caption { text-align: center; font-size: 12px; font-weight: 600; color: var(--ink-soft); margin: 4px 0 0; }
+
+/* ---- Add-tab button, styled distinctly from the data tabs it sits beside ---- */
+.tabs button.add-tab {
+  border-style: dashed; color: var(--accent); background: var(--accent-soft);
+}
+.tabs button.add-tab:hover { background: var(--accent); color: #fff; }
+
+/* ---- Tab-creation modal ---- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(30, 37, 48, 0.45);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.modal-box {
+  background: var(--card); border-radius: 8px; padding: 20px 22px;
+  width: 420px; max-width: 92vw; max-height: 82vh; overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+.modal-box h3 { margin: 0 0 14px; font-size: 15px; }
+.modal-box .field-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 12px 0 4px; }
+.modal-box input[type="text"], .modal-box input[type="number"] {
+  width: 100%; padding: 6px 8px; border: 1px solid var(--input-border, var(--rule)); border-radius: 4px;
+  font-family: var(--sans); font-size: 13px; margin-bottom: 6px;
+}
+.modal-box select { width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 4px; font-size: 13px; }
+.mode-row { display: flex; gap: 16px; font-size: 13px; margin-bottom: 8px; }
+.mode-row label { display: flex; align-items: center; gap: 5px; }
+.chk-list {
+  max-height: 220px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 4px;
+  padding: 6px 10px; margin-top: 4px; background: #fbfaf7;
+}
+.chk-row { display: block; font-size: 12.5px; font-family: var(--mono); padding: 2px 0; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+/* ---- Warnings dialog (warningsDialogView.js) ---- */
+.warnings-dialog { width: 560px; }
+.warnings-section + .warnings-section { margin-top: 14px; }
+.warnings-section .warnings { margin-bottom: 0; }
+
+/* ---- Help dialog (helpDialogView.js) — section headings reuse .mp-subhead as-is ---- */
+.help-dialog { width: 640px; }
+
+/* ---- Gravimetric results dialog (gravimetricEntryView.js) ---- */
+.grav-dialog { width: 480px; }
+.grav-section { border-top: 1px solid var(--rule); margin-top: 14px; padding-top: 10px; }
+.grav-section:first-of-type { border-top: none; margin-top: 4px; padding-top: 0; }
+.grav-subrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grav-calc {
+  background: #fbfaf7; border: 1px solid var(--rule); border-radius: 4px;
+  padding: 8px 10px 2px; margin-top: 4px;
+}
+.grav-preview { font-size: 12.5px; color: var(--ink-soft); margin: 2px 0 6px; }
+
+/* ---- Compare Files view ---- */
+.compare-shelf, .compare-template-bar {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 14px; margin-bottom: 14px;
+}
+.compare-template-bar select { padding: 5px 8px; border: 1px solid var(--rule); border-radius: 4px; font-size: 13px; }
+.compare-template-bar .count { font-size: 12px; color: var(--ink-soft); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-soft); color: var(--accent); border-radius: 14px;
+  padding: 4px 6px 4px 12px; font-size: 12.5px; font-family: var(--mono);
+}
+.chip-remove {
+  border: none; background: none; color: var(--accent); cursor: pointer;
+  font-size: 15px; line-height: 1; padding: 0 6px; border-radius: 50%;
+}
+.chip-remove:hover { background: var(--accent); color: #fff; }
+
+.hint-box {
+  background: var(--card); border: 1px dashed var(--ink-soft); border-radius: 6px;
+  padding: 20px; color: var(--ink-soft); font-size: 13px; text-align: center;
+}
+
+.dim-summary {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 10px 14px; margin-bottom: 14px; font-size: 12.5px; line-height: 1.9;
+}
+.dim-tag {
+  display: inline-block; font-family: var(--mono); font-size: 11.5px;
+  background: var(--accent-soft); color: var(--accent); border-radius: 3px;
+  padding: 1px 6px; margin: 1px 2px;
+}
+.dim-tag.dim-partial { background: var(--warn-bg); color: var(--warn-ink); }
+.dim-empty { color: var(--ink-soft); font-style: italic; }
+/* A channel tag rendered as a <button> (compareTemplateView.js, once a comparison
+   template is active) — same look as a plain informational .dim-tag <span>, but
+   clickable, so a browser's default button chrome (border/font) needs resetting to
+   match. One list that becomes interactive, not a second parallel one. */
+.dim-tag.toggle-chip { font: inherit; font-family: var(--mono); font-size: 11.5px; border: none; cursor: pointer; }
+.dim-tag.toggle-chip.on { background: var(--accent); color: #fff; }
+.dim-tag.toggle-chip:hover { box-shadow: 0 0 0 1px var(--accent) inset; }
+
+.compare-picker {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px;
+}
+.compare-picker select { margin: 6px 0; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 4px; font-size: 13px; }
+.compare-picker h3 { font-size: 12px; font-weight: 700; margin: 14px 0 4px; color: var(--accent); }
+.compare-picker h3:first-child { margin-top: 0; }
+
+/* ---- Toggle palette (compareTemplateView.js) — replaces the old radio+dropdown
+   single-chart picker: click a chip to add/remove that plot from the active
+   template's pages (auto-flow placement — see compareTemplates.js's retile). ---- */
+.toggle-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+.toggle-chip {
+  font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 14px;
+  border: 1px solid var(--rule); background: var(--card); color: var(--ink); cursor: pointer;
+}
+.toggle-chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toggle-chip:hover { border-color: var(--accent); }
+
+/* ---- Comparison report pages (compareTemplateView.js) — same "card on screen,
+   real page-break at print time" convention as .report-page (see the Report view
+   note above); a SEPARATE class/copy of that convention on purpose, per CLAUDE.md —
+   this is a different document from the single-file report, not shared content. ---- */
+.compare-pages { margin-top: 16px; }
+.compare-report-page {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 16px 20px; margin-bottom: 22px;
+}
+.compare-page-tools { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.compare-plot-grid { display: grid; gap: 14px; }
+.compare-plot-grid.mode-2up { grid-template-columns: 1fr; }
+.compare-plot-grid.mode-4up { grid-template-columns: 1fr 1fr; }
+/* min-width:0 overrides a CSS Grid item's default min-width:auto — without it, a
+   grid track won't shrink narrower than its content's INTRINSIC size, and a
+   Chart.js canvas's intrinsic width is whatever pixel size was last assigned to it
+   (chart.resize()/responsive both set an explicit inline width, not a fluid one).
+   If that canvas was sized against the wrong (on-screen, pre-pagination) viewport
+   width — which print-time JS has no reliable hook to correct after Chromium's own
+   internal print-layout pass takes over — the grid track it sits in would refuse to
+   narrow to the true page width, forcing the whole grid wider than the page and
+   losing content off the right/bottom edge instead of laying out 2/4-up as intended. */
+.compare-plot-box { border: 1px solid var(--rule); border-radius: 6px; padding: 8px; min-width: 0; }
+.compare-plot-title {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12.5px; font-weight: 600; margin-bottom: 4px;
+}
+.compare-plot-box .chart-wrap { height: 320px; min-width: 0; }
+.compare-plot-box canvas { max-width: 100%; }
+
+/* ---- Machine Profiles (machineProfilesView.js) — table.datatbl reused for the rig
+   list, same generic-table rationale as Audit's own reuse just below. Input styling
+   otherwise only exists scoped to .modal-box (dialogs); .mp-form isn't a dialog (it's
+   inline in a persistent tab), so it gets its own copy of that same input look. ---- */
+.mp-list td.mp-actions { white-space: nowrap; text-align: right; }
+.mp-list td.mp-actions button { margin-left: 6px; }
+.mp-form {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 16px 20px; margin-top: 14px; max-width: 560px;
+}
+.mp-form h3 { margin: 0 0 4px; font-size: 14px; }
+.mp-form .field-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); margin: 12px 0 4px; }
+.mp-form input[type="text"] {
+  width: 100%; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 4px;
+  font-family: var(--sans); font-size: 13px; box-sizing: border-box;
+}
+.mp-subhead { font-size: 12px; font-weight: 700; margin: 16px 0 4px; color: var(--accent); }
+/* Upstream/Downstream side by side — shared by Counter, Sensor, LS Sensor, and LBE
+   Sensor's identical two-column shape (see machineProfilesView.js's buildLocationPair). */
+.mp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.mp-toggle { display: flex; align-items: center; gap: 6px; font-size: 12.5px; margin-top: 14px; }
+.mp-toggle-block { margin-top: 4px; }
+
+/* ---- Audit Trail (auditView.js) — hidden, developer-only view. Each step is a
+   card; table rendering reuses table.datatbl (report/reportView.js's own generic
+   table look) rather than inventing a second table style, per CLAUDE.md's
+   "generic HELPERS may be shared" rule — this genuinely is just presentation
+   machinery, no standard's decision baked into the CSS itself. ---- */
+.audit-step {
+  background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 14px 18px; margin-bottom: 14px;
+}
+.audit-step h3 { margin: 0 0 4px; font-size: 13px; color: var(--accent); }
+.audit-clause { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
+.audit-formula { font-family: var(--mono); font-size: 12px; background: #fbfaf7; border: 1px solid var(--rule); border-radius: 4px; padding: 6px 10px; margin-bottom: 8px; }
+.audit-inputs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.audit-kv { font-family: var(--mono); font-size: 12px; background: var(--accent-soft); color: var(--accent); border-radius: 3px; padding: 1px 7px; }
+.audit-output { font-size: 13px; margin-bottom: 6px; }
+.audit-table-wrap { overflow-x: auto; margin: 6px 0; }
+.audit-table { font-size: 11px; }
+.audit-table td:first-child, .audit-table th:first-child { text-align: left; white-space: nowrap; }
+/* Native title-attribute tooltip (see auditView.js's buildTable) — dotted underline is
+   the whole affordance; no JS popover, no positioning, nothing that survives to print
+   (a hover can't happen on paper, which is fine — see auditSampling.js's cellTitle doc). */
+.audit-table td.has-tooltip { cursor: help; border-bottom: 1px dotted var(--ink-soft); }
+/* Interactive size-picker widget (auditWidgets.js's buildSizePickerTable) — a plain
+   <select> re-rendering the table's last column, same select styling every other
+   toolbar picker in this app already uses. */
+.audit-size-picker-wrap { margin-bottom: 6px; }
+.audit-size-picker-label { font-size: 12px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; }
+.audit-size-picker { padding: 5px 8px; border: 1px solid var(--rule); border-radius: 4px; font-size: 13px; }
+.audit-note { font-size: 12px; color: var(--ink-soft); font-style: italic; margin-top: 6px; }
+.audit-raw-details { margin-top: 18px; }
+.audit-raw-details summary { cursor: pointer; font-size: 12px; color: var(--ink-soft); }
+.audit-raw-actions { margin-top: 8px; }
+.audit-raw { font-family: var(--mono); font-size: 10.5px; white-space: pre-wrap; word-break: break-word;
+  background: #fbfaf7; border: 1px solid var(--rule); border-radius: 4px; padding: 10px; margin-top: 8px; max-height: 480px; overflow-y: auto; }
+
+/* Paper size (Letter/A4) is set at print time by app.js writing the `size` value into
+   #paperSizeStyle (see index.html) — @page doesn't support conditional selectors, so
+   the size itself can't live in this static stylesheet. Margin/compacting rules below
+   apply regardless of which size is chosen. 0.5in on all four sides (see the
+   right-margin history/warning below).
+
+   reportView.js's computePrintFigureSizePx duplicates this margin (and the paper
+   widths, and the .figure-wrap heights below) as JS constants, to compute Figure
+   B.1/B.2/B.3's canvas pixel size WITHOUT measuring the DOM (measuring turned out to
+   be unreliable for print — see that function's comment). If this margin ever
+   changes, that function's PAGE_MARGIN_IN must be updated to match by hand — nothing
+   enforces the two staying in sync automatically. compareTemplateView.js's
+   computePrintPlotSizePx keeps its OWN separate copy of the same margin/DPI constants
+   for the same reason (Compare Files is a different document — see CLAUDE.md) — a
+   margin change here means updating BOTH files' constants by hand.
+
+   History / WARNING on the right margin: it was once widened to 0.7in (others 0.5in)
+   because a real printed copy clipped the right edge of page 1's tables — the browser's
+   print PREVIEW looked fine, but that printer's actual non-printable hardware margin on
+   that edge exceeded 0.5in and its engine shaved off what our CSS correctly laid out.
+   It was returned to 0.5in on all sides at the user's request (they wanted ~0.5in around
+   the page-2 table and accept the tighter margin). If page 1's right edge ever clips on
+   a physical printer again, restore the right value to 0.7in HERE and in reportView.js's
+   PAGE_MARGIN_IN.right — that's a printer-hardware buffer, not a layout fix.
+
+   Footer: the "Page X of Y" counter lives in the @bottom-right page margin box — this
+   is the ONLY place the total-page count (counter(pages)) is available; regular
+   document elements can't see it. The "Printed: <date>" half is written into
+   @bottom-left by app.js (a style can't compute today's date, so JS injects it — see
+   #printFooterStyle / applyPrintFooter). Page margin boxes are CSS Paged Media: they
+   render in browsers that implement them; where they don't, the footer is simply
+   absent (no layout breakage), and the browser's own print-dialog "Headers and
+   footers" option is the fallback. */
+@page {
+  margin: 0.5in;
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font: 8pt "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #666;
+  }
+}
+
+@media print {
+  html, body { height: auto; }
+  body { background: #fff; }
+  .sidebar, .context-toolbar { display: none !important; }
+  /* .wrap/.content/.view are a fixed-height (100vh), internally-scrolling shell on
+     screen (see their screen-mode rules above) — every one of those constraints must
+     be reset for print, or the printed report would be CLIPPED to a single viewport's
+     worth of content instead of flowing/paginating naturally across sheets. */
+  .wrap { max-width: none; padding: 0; height: auto; overflow: visible; display: block; }
+  .content { height: auto; overflow: visible; display: block; }
+  .view.active { overflow: visible; flex: none; padding-bottom: 0; }
+  .report-page { border: none; padding: 0; font-size: 11px; line-height: 1.2; margin-bottom: 0;
+    page-break-after: always; }
+  .report-page:last-child { page-break-after: auto; }
+  /* min-height matching the full physical usable page (same 10in/10.69in letter/A4
+     numbers .w16889-p2-page's own explicit height already uses, just as a FLOOR here,
+     not a fixed height) — otherwise .report-page's box only grows as tall as its own
+     content (ordinary auto-height block), so a shorter page's box ends right after its
+     last content row, well above the physical sheet's real bottom edge. .report-logo's
+     bottom-center position:absolute (below) is relative to THIS box, so without this,
+     "bottom" lands just under the last real content (Comments box, a field row, ...)
+     instead of the true page bottom — a real bug, caught from an actual print,
+     2026-09-09: the logo sat on top of report fields instead of below them in the
+     page's true margin. min-height only EXTENDS a short page; genuinely long content
+     that already needs the full page (or overflows to a 2nd) is unaffected. Excludes
+     .w16889-p2-page/.w23369-p2-page — those already set their own explicit height. */
+  .report-page:not(.w16889-p2-page):not(.w23369-p2-page) { min-height: 10in; }
+  body[data-paper="a4"] .report-page:not(.w16889-p2-page):not(.w23369-p2-page) { min-height: 10.69in; }
+
+  /* .report-logo: print-only (base rule above is display:none) — centered horizontally,
+     below the page's own content, per the user. left:50%+translateX(-50%) centers
+     regardless of the image's own resolved width (a fixed left:Npx couldn't, since
+     width varies per uploaded logo/aspect ratio). Sized 195x96 max — 65x32 originally,
+     doubled to 130x64, then 150% of that per the user from a real print preview
+     (2026-09-09, all three same day).
+
+     Landscape pages (ISO 16889/23369 Page 2): reportView.js's applyCompanyLogo appends
+     this same element INSIDE .w16889-p2-rotate/.w23369-p2-rotate instead of
+     .report-page directly — that block's own width/height ARE the landscape footprint
+     (rotated 90deg as one rigid unit with its children), so this exact same bottom-
+     center rule means "bottom-center of the landscape reading orientation" there too,
+     with no separate rotation math needed. That page's table is tuned close to filling
+     its footprint (see the "ISO 16889 Page 2" comment below on w16889-p2-table) —
+     LOOKS tight in this tool's own page.pdf()-based checks, but a real printed PDF
+     (2026-09-09) showed clear margin below the table, no overlap at all; page.pdf()
+     doesn't faithfully reproduce real Chrome print output for this rotated page (see
+     WISHLIST.md's "Known bugs" section — a second, distinct case of the same
+     unreliability already documented there for multi-chart pages). Trust a real
+     print over this repo's own render-check tooling for this one page. */
+  .report-logo { display: block; position: absolute; bottom: 12px; left: 50%;
+    transform: translateX(-50%); max-width: 195px; max-height: 96px; width: auto; height: auto; }
+
+  /* Compare Files' comparison report pages — same page-break convention as
+     .report-page above, own copy of the height constants (see compareTemplateView.js's
+     computePrintPlotSizePx, which this must be kept in sync with BY HAND, same
+     unenforced-but-documented relationship reportView.js's computePrintFigureSizePx
+     has with .single-fig/.double-fig above). "2up" reuses .double-fig's own proven
+     3.85in figure height (two full-width figures stacked); "4up" is a new 2x2 grid,
+     each cell roughly half that. */
+  /* The builder UI — file shelf, template manager, dimension summary/channel
+     toggles, and the sizes/standard-curve picker — is all editing chrome, not
+     report content; only .compare-pages' actual plot pages belong on paper. Same
+     "chrome vs. content" split .context-toolbar/.sidebar already get above, just
+     for the pieces of Compare that live inside the .view itself rather than a
+     toolbar. A hint-box ("no active template"/"add files") is likewise chrome —
+     nothing to print if it's showing, so hiding it just leaves a blank page rather
+     than printing instructions meant for the screen. */
+  .compare-shelf, .compare-template-bar, .dim-summary, .compare-picker, #view-compare .hint-box { display: none !important; }
+  .compare-page-tools, .edit-chart-btn, .axis-controls, .compare-plot-title .chip-remove { display: none !important; }
+  .compare-report-page { border: none; padding: 0; margin-bottom: 0; page-break-after: always; }
+  .compare-report-page:last-child { page-break-after: auto; }
+  .compare-plot-box { border: none; page-break-inside: avoid; }
+  .compare-plot-grid.mode-2up .chart-wrap { height: 3.85in; }
+  .compare-plot-grid.mode-4up .chart-wrap { height: 1.85in; }
+
+  /* Audit Trail (auditView.js) — no canvases here (unlike Report/Compare), so
+     none of their JS-timing print problems apply; a plain HTML table naturally
+     shrinks its own column widths to fit the page (unlike a canvas's JS-forced
+     pixel size, which can't). table.datatbl's own print rule (9px font, tight
+     padding, below) already applies to .audit-table for free since it carries
+     that class too — one generic table style, not a second print-tuned one.
+     Steps flow as continuous content, not one page each (unlike .report-page) —
+     a one-line "test type" step doesn't deserve its own sheet — each just avoids
+     splitting across a page boundary where the browser can manage it. The raw
+     JSON dump is a screen-only drill-down tool, not report content. */
+  .audit-step { border: none; padding: 6px 0; margin-bottom: 0; page-break-inside: avoid; }
+  .audit-table-wrap { overflow: visible; }
+  .audit-raw-details { display: none; }
+  /* The dotted underline hints a hover tooltip on screen — hovering can't happen on
+     paper, so the hint would just look like a stray formatting artifact. */
+  .audit-table td.has-tooltip { cursor: auto; border-bottom: none; }
+
+  .val.overridden { background: transparent; color: inherit; }
+  .field-info { display: none; }   /* hover tooltip means nothing on paper */
+
+  /* Page 1 was measured actually filling only about half the sheet at the OLD
+     (9px/max-compaction) sizing below — there was never a real one-page-overflow
+     risk at these larger sizes, just leftover headroom nobody was using. Scaled up
+     roughly 25-30% across the board (font, margins, padding) rather than picking
+     one dimension to grow, so the page reads as proportionally larger, not just
+     "the same cramped layout with bigger gaps." See the note this replaced for why
+     it was ever this small in the first place (a since-outgrown Comments-field
+     overflow, at the OLD much larger pre-compaction sizing, not this one).
+
+     CORRECTION: that scale-up turned out NOT comfortable — a real print overflowed
+     page 1 onto a second page. The first two rounds of fixing this (see git history)
+     both guessed at the element counts driving the page's height ("8 h3 + ~15
+     field-rows") and both undershot — a real count (grep the template) is 4 h2, 10
+     h3, and 23 field-rows, meaningfully more than either estimate assumed, which is
+     why trims sized against the wrong count kept falling short on a different file's
+     content. THIRD CORRECTION below is sized against the real counts, verified by
+     adding up every element's actual height contribution rather than trimming a bit
+     more and hoping:
+       h1(1) 24px + h2(4) 85.5px + h3(10) 173.75px + field-row(23) 339.25px +
+       table rows(13, across 4 tables) 154.25px + comments-box(1) 16.75px
+       = ~793.5px (~8.26in) against a 9in usable page — ~0.74in (~5 line-heights)
+       of REAL margin, not just barely fitting one file's content. Includes a small
+       line-height cut (originally 1.3, applies to every .report-page, all standards —
+       still comfortably readable, not the illegible extreme the numeric data tables
+       already use at 8.5-9px elsewhere on this page) since with 50+ lines of text on
+       this page alone, even a small per-line saving adds up more than any single
+       element's margin does — and it's a net positive for every OTHER print page
+       too (Table B.2, the figures' captions/headers), not just this one.
+
+     FOURTH CORRECTION: still overflowed on yet another file, this time specifically
+     because its Comments text wrapped to 2 lines (a longer note than the file this
+     was checked against). The by-hand arithmetic above said this should have had
+     ~0.74in to spare even for a 2-line comment — it didn't in practice, meaning real
+     browser font-metric rounding eats more of that margin than a hand calculation
+     assuming a flat line-height multiplier can predict exactly. Rather than keep
+     computing to an exact edge that real rendering keeps landing just past, this
+     round intentionally OVERSHOOTS: line-height cut again (1.25 -> 1.2) and Comments
+     given its own smaller font (see its own rule below) — Comments is also the one
+     field with genuinely UNBOUNDED length (free text, not a bounded label/value),
+     so no fixed budget can fully guarantee it always fits regardless of how much
+     margin exists elsewhere; this pushes the practical threshold meaningfully
+     higher without pretending the risk is fully eliminated. */
+  .report-page h1 { font-size: 16px; margin: 0 0 4px; }
+  /* h2's solid --ink background (screen rule above) is exactly the kind of
+     background-color browsers drop from print output by default to save ink —
+     deliberately NOT overridden with print-color-adjust:exact here: a first
+     attempt forced the fill back on, but that meant printing a solid black bar
+     per h2 on every physical copy, real toner cost for anyone printing hard
+     copies, which the user flagged directly. The border-only outline (no fill)
+     is the actual intent — it persists the boxed-heading SHAPE (so h2 doesn't
+     just read as text sitting in dead space, oddly indented relative to h3) while
+     leaving the ink-heavy fill under the printer's own default "skip background
+     graphics" behavior, same as every browser's ordinary print-friendly default.
+     A user who's explicitly turned on "print background graphics" in their own
+     print dialog still gets the filled version — this only stops FORCING it.
+
+     The border adds ~3px of real height (1.5px top + bottom) that wasn't there
+     before — margin-bottom and vertical padding are trimmed by that same ~3px
+     (2px -> 0, 1px top/bottom -> 0) so h2's TOTAL rendered height returns to what
+     it was before the border existed. This mattered for real: the border, added
+     with no compensation, was enough to push ISO 4548-12's Page 1 (4 h2 on that
+     page alone, already the tightest print budget in the app — see this page's
+     own history just above) into overflowing onto an extra sheet. */
+  .report-page h2 {
+    font-size: 11.5px; margin: 3px 0 0; padding: 0 6px;
+    border: 1.5px solid var(--ink);
+  }
+  .report-page h3 { font-size: 11.5px; margin: 1px 0 1px; }
+  .field-row { gap: 2px 18px; margin-bottom: 1px; }
+  .field { min-width: 155px; }
+  .field .val { min-height: 0; padding: 1px 3px; }
+  .field .unit { font-size: 10px; }
+  table.datatbl { font-size: 9px; margin: 1px 0 1px; }
+  table.datatbl th, table.datatbl td { padding: 0 4px; }
+  /* Comments is the one field with genuinely UNBOUNDED length (free text a technician
+     types, not a bounded label/value) — every other element on this page has a
+     predictable-enough footprint to budget for, this one doesn't, and no amount of
+     compacting the REST of the page changes that. Given its own smaller font (like
+     the numeric data tables above already use), a long comment is less likely to
+     need 2 lines in the first place, and each line costs less when it does — but for
+     an exceptionally long note, this page rolling to a second sheet is still
+     possible; that's inherent to free text, not something a fixed layout budget can
+     fully rule out. */
+  .comments-box { min-height: 0; padding: 1px 4px; margin-top: 1px; font-size: 9.5px; }
+  .hint, .footer-note { display: none; }
+  .axis-controls, .axis-controls-mount, .edit-chart-btn { display: none !important; }
+
+  /* ISO 16889 Page 1 gets its own, slightly larger print sizing — the generic
+     .report-page rule just above was hard-won against a DIFFERENT, denser page (4
+     h2, 10 h3, 23 field-rows, per its own history above); this page has 3 h2, 10
+     h3, and 15 field-rows — meaningfully less content, so the same compaction just
+     leaves real, unused headroom on the sheet (confirmed by the user's own print:
+     the page reads clearly under-filled).
+
+     Budget, using the SAME per-element costs the generic rule's own history
+     measured (h1 24px, h2 21.375px, h3 17.375px, field-row 14.75px, table-row
+     11.87px, comments-box 16.75px) against THIS page's actual counts:
+       h1(1) 24 + h2(3) 64.1 + h3(10) 173.75 + field-row(15) 221.25 +
+       table-rows(14, across 4 tables) 166.2 + comments-box(1) 16.75 = ~666px
+     against the same 9in (864px) usable page — ~198px (2.3in) of real slack at the
+     GENERIC sizing, over 3x what the other page had (~0.74in) when it was tuned.
+     The bump below (~10% on headings/fields/tables) costs roughly 65px of that
+     slack, leaving ~133px (~1.4in) — still comfortably more margin than the ~0.74in
+     that page's own history shows can still occasionally overflow, and Comments
+     (the one genuinely UNBOUNDED field) is deliberately left at the same size/risk
+     as the generic rule, not grown, so its own overflow risk is no worse than
+     before. Needs a real print check like anything else in this print-CSS area. */
+  .w16889-page1.report-page h1 { font-size: 17.5px; margin: 0 0 5px; }
+  .w16889-page1 h2 { font-size: 12.5px; margin: 4px 0 3px; padding: 1.5px 7px; }
+  .w16889-page1 h3 { font-size: 12.5px; margin: 2px 0 1.5px; }
+  .w16889-page1 .field-row { gap: 3px 18px; margin-bottom: 2.5px; }
+  .w16889-page1 .field .val { padding: 1.5px 4px; }
+  .w16889-page1 .field .unit { font-size: 10.5px; }
+  .w16889-page1 table.datatbl { font-size: 9.75px; margin: 2px 0 2px; }
+  .w16889-page1 table.datatbl th, .w16889-page1 table.datatbl td { padding: 1px 5px; }
+
+  /* B.2 print sizing is deliberately compact so CLUMPS_PER_PAGE (reportView.js —
+     currently 5; see that constant's own comment for the byte-count this was
+     re-verified against, now that each page's shape is fully static) whole clumps
+     — plus this sheet's identification header, and on the first sheet the title —
+     fit one page with real margin, not just barely. The generator puts exactly
+     that many per .report-page and breaks after each; if a page's clumps
+     overflowed the sheet, the last one would spill onto an extra physical page
+     (the orphan bug from the old natural-flow model). 8.5px monospace stays
+     legible even for the millions-range counts, matching the reference report's
+     own dense layout. */
+  .b2-page h1, .w19438-page h1 { font-size: 13px; margin: 0 0 5px; }
+  .b2-table, .w19438-table { font-size: 8.5px; }
+  .b2-table th, .b2-table td, .w19438-table th, .w19438-table td { padding: 1px 4px; }
+  .b2-table .b2-spacer td, .w19438-table .b2-spacer td { height: 7px; }
+  .w19438-table .w19438-spacer-after-initial td { height: 18px; }
+
+  /* ISO 16889 Page 2: 18 columns (16 sizes + 2 label) x 34 rows, ALWAYS — the
+     table's shape is fully static now (iso16889_page2.html), not built at render
+     time. Three rounds of hand-calculating a font-size/padding combination that
+     would just barely fit 18 columns in the ~9in rotated width budget each turned
+     out wrong in practice (one still clipped 3 columns off-page silently via
+     .w16889-p2-page's own overflow:hidden — a real, if quiet, data-loss bug, not
+     just a cosmetic miss) — so this stops trying to calculate an exact fit at all.
+
+     table-layout:fixed + the <colgroup> in iso16889_page2.html (2% label columns,
+     16 columns sharing the rest via .w16889-size-col-group) makes column width a
+     STRUCTURAL GUARANTEE instead of a guess: the table is physically incapable of
+     exceeding 100% of its container width, full stop, regardless of font-size or
+     how wide any individual value is. white-space is switched from nowrap to
+     normal + overflow-wrap:break-word so a value that doesn't fit its column
+     WRAPS to a second line instead of overflowing or forcing the column wider —
+     the safety valve table-layout:fixed needs to have somewhere to put content
+     that doesn't fit, rather than clipping it. Font-size can now be picked for
+     legibility without needing to hit an exact width target — correctness no longer
+     depends on it, only on how often a cell wraps. Sizing here was VERIFIED with a
+     headless-Chromium render of the real print (see tools/render-check): the report
+     prints landscape via the rotate trick, and because the rotated block is wider (in
+     layout terms) than the sheet's printable width, the browser SHRINK-TO-FITS the whole
+     page down to that width — which scales font AND column widths together, so bumping
+     font alone changes nothing on paper (chasing that wasted several rounds). What
+     actually enlarges the table is the roomier box below (0.5in @page margins -> a
+     7.5x10in usable area, with the rotate/page boxes sized to match) PLUS font 11px —
+     the largest that still keeps an 8-digit count (10s-of-millions, a high-concentration
+     test) on one line at this rotate width. The one hard limit: [h2 + field-row + table]
+     must fit the rotate's own 7.5in height or .w16889-p2-page's overflow:hidden clips the
+     bottom rows, so vertical padding is kept small (2px). Re-measure via tools/render-
+     check before pushing font or padding higher.
+     A real print is still the right way to confirm this reads well, but it can no
+     longer come back with the wrong number of columns. */
+  .w16889-p2-page h2 { font-size: 12px; margin: 0 0 5px; }
+  .w16889-p2-table { font-size: 11px; table-layout: fixed; }
+  .w16889-p2-table th, .w16889-p2-table td { padding: 2px 1px; white-space: normal; overflow-wrap: break-word; }
+
+  /* ISO 23369 Page 2 — own copy of ISO 16889 Page 2's identical print-fit numbers
+     just above (same 18x34 table shape, same rotated-landscape footprint — see
+     that block's own comment for the full derivation). */
+  .w23369-p2-page h2 { font-size: 12px; margin: 0 0 5px; }
+  .w23369-p2-table { font-size: 11px; table-layout: fixed; }
+  .w23369-p2-table th, .w23369-p2-table td { padding: 2px 1px; white-space: normal; overflow-wrap: break-word; }
+
+  /* Report figures: explicit print heights per figure-count (see the screen note on
+     why explicit, not flex). Budget against Letter's ~10in usable area (11in - 2x0.5in
+     margins — see the @page margin change); A4's ~10.7in is larger so these fit it too.
+       single-fig (B.1): 7.7in chart + header ~0.65in + caption ~0.25in ≈ 8.6in — the big
+         single figure the milestone labels need, well under the 10in budget (it has ~1.4in
+         of slack now that margins are 0.5in; left at 7.7in deliberately — it already reads
+         big enough, and growing it isn't what was asked).
+       double-fig (B.2+B.3, and 16889's C.2/C.3 + C.4/C.5): non-chart content (header
+         ~0.66in + 2 captions ~0.38in) is ~1.04in. The charts stay 3.85in each (2 = 7.7in);
+         the ~1.2in the roomier page freed up is spent on WHITE SPACE BETWEEN THE PLOTS
+         instead of taller charts (a specific request — the plots were bunched at the top
+         with the bottom of the sheet blank). That's the enlarged figure-wrap margin below
+         (0.3in top / 0.15in bottom each): 0.66 + 2x(0.3+3.85+0.15) + 0.38 ≈ 9.64in, ~0.36in
+         under the 10in ceiling so it still can't spill onto an extra sheet. Verified with a
+         real-letter-viewport render — see tools/render-check/shot-fig.js. Full page width
+         (no max-width) — an earlier version capped the width, which read as smaller overall.
+
+     The two chart heights (7.7in, 3.85in) are duplicated as JS constants in reportView.js's
+     computePrintFigureSizePx (FIGURE_HEIGHT_IN) — Chart.js measuring this element directly
+     turned out to be unreliable for print, so the canvas pixel size is computed from these
+     numbers, not read from the DOM. If either height changes, update FIGURE_HEIGHT_IN to
+     match by hand. (The margins here don't affect the canvas size, so they need no JS change.) */
+  .single-fig .figure-wrap { height: 7.7in; margin: 8px 0 4px; }
+  .double-fig .figure-wrap { height: 3.85in; margin: 0.3in 0 0.15in; }
+  .figure-caption { font-size: 11px; margin: 4px 0 0; break-inside: avoid; page-break-inside: avoid; }
+
+  /* ISO 3968 Page 1 mixes fixed content (identification/operating-conditions
+     fields) ABOVE Figure 4 on the same sheet — confirmed with the user, unlike
+     every other standard's one-figure-per-dedicated-page convention above, so
+     there's no existing precedent height to copy. 4in is a first-pass estimate,
+     not yet measured against a real printed sheet (see reportView.js's
+     FIGURE_HEIGHT_IN.pq3968, which MUST be kept in sync with this by hand, same
+     convention as .single-fig/.double-fig above). Revisit once actually printed. */
+  .iso3968-page1 .chart-wrap { height: 4in; margin: 8px 0 4px; }
+}

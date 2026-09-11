@@ -1,0 +1,26 @@
+<!-- =====================================================================================
+     iso23369_page5.html — ISO 23369:2022, "Add Count Details" (OPTIONAL page — only
+     rendered when the report toolbar's "Add Count Details" checkbox is on, see
+     iso23369Pages.js's `optional: true`). Own copy of iso16889_page5.html's shape,
+     per CLAUDE.md — not asked for by this standard's own outline, added for parity
+     with the other clean-build standards (cheap, off by default, reuses fully
+     generic count-vs-time chart machinery). -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 23369:2022 — Add Count Details</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="upstreamCountsVsTime23369"></canvas>
+  </div>
+  <p class="figure-caption">Upstream Counts vs. Time</p>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="downstreamCountsVsTime23369"></canvas>
+  </div>
+  <p class="figure-caption">Downstream Counts vs. Time</p>
+  <div class="axis-controls-mount" data-axis-controls-for="downstreamCountsVsTime23369"></div>
+</div>

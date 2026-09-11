@@ -1,0 +1,266 @@
+<!-- =====================================================================================
+     iso23369_page2.html — ISO 23369:2022, Page 2 (Particle Counts per Millilitre and
+     Filtration Ratio). This standard's own outline states this page "directly
+     mirrors ISO 16889's page 2" — literal structural copy of iso16889_page2.html
+     (own .w23369-* class names/data-row keys to avoid any CSS-selector collision
+     with ISO 16889's own page, per CLAUDE.md's report-content-never-shared rule).
+     Same fully static shape — every row AND column (1 Initial + 10 buckets x 3 rows
+     [Up/Down/a] + 1 Avg x 3 rows = 34 rows; 2 label + 16 size columns = 18 columns)
+     is already present here, before any JS runs — see iso16889_page2.html's own
+     header comment for the full print-CSS rationale this inherits unchanged
+     (table-layout:fixed + <colgroup>, landscape rotate-in-place technique).
+
+     reportView.js's fillTable23369Page2 only ever sets .textContent on a
+     .w23369-size-col cell that already exists and toggles rpt-slot-hidden (app.css)
+     on any size column beyond however many are actually selected — never
+     creates/removes a node. Each row's 16 cells are filled BY POSITION (document
+     order), matching resolvedDisplaySizes/bucket-array index — no per-cell id needed. -->
+<div class="report-page w23369-p2-page">
+  <div class="w23369-p2-rotate">
+    <h2>Particle Counts per Millilitre and Filtration Ratio</h2>
+    <div class="field-row">
+      <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+      <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+      <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+    </div>
+    <div class="w23369-p2-scroll">
+      <table class="datatbl w23369-p2-table">
+        <colgroup>
+          <col style="width: 6%"><col style="width: 6%">
+          <col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group">
+          <col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group">
+          <col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group">
+          <col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group"><col class="w23369-size-col-group">
+        </colgroup>
+        <thead>
+          <tr class="w23369-p2-header">
+            <th colspan="2">Time Interval</th>
+            <th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th>
+            <th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th>
+            <th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th>
+            <th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th><th class="w23369-size-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-row="initial">
+            <th colspan="2">Initial</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="10-up"><th rowspan="3">10%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="10-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="10-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="20-up"><th rowspan="3">20%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="20-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="20-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="30-up"><th rowspan="3">30%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="30-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="30-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="40-up"><th rowspan="3">40%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="40-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="40-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="50-up"><th rowspan="3">50%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="50-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="50-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="60-up"><th rowspan="3">60%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="60-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="60-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="70-up"><th rowspan="3">70%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="70-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="70-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="80-up"><th rowspan="3">80%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="80-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="80-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="90-up"><th rowspan="3">90%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="90-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="90-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="100-up"><th rowspan="3">100%</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="100-down"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="100-ratio"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+
+          <tr data-row="avg-up" class="w23369-avg-row"><th rowspan="3">Avg.</th><th>Up</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="avg-down" class="w23369-avg-row"><th>Down</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+          <tr data-row="avg-ratio" class="w23369-avg-row"><th>a</th>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+            <td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td><td class="w23369-size-col"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">A blank "Initial" row means this build doesn't compute pre-test cleanliness data for this standard yet. A blank Up/Down/a row (typically 10%, on a short test) means that reporting-time window falls entirely within the standard's mandatory first-3-minutes disregard period — there is genuinely no data to report for it, not a missing value.</p>
+  </div>
+</div>

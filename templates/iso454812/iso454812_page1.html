@@ -1,0 +1,305 @@
+<!-- =====================================================================================
+     iso454812_page1.html — ISO 4548-12:2017, Page 1 (Test/Filter Identification,
+     Operating Conditions, Test Results). Table B.2 and Figures B.1-B.3 are follow-up
+     work, not built yet — see the plan.
+
+     Labels here are plain static text — every active standard's own convention (see
+     iso16889_page1.html's own header comment). Static text keeps this standard's
+     report copy fully contained in this file, at the cost of unit-system labels
+     (e.g. "kPa") not relabeling to "PSI" when US units are selected — the underlying
+     VALUES still convert correctly (data-slot fields are unit-tagged in
+     iso454812Mapper.js), only the printed unit text stays fixed. Acceptable for v1.
+
+     Units are printed via a trailing <span class="unit"> AFTER the value box, not in
+     the label before it (label: value unit — not label (unit): value).
+
+     The Overall Filter Efficiency table (#effTable) has empty <thead>/<tbody> — it's
+     filled entirely by reportView.js's fillEfficiencyTable from store._effTable,
+     because the particle sizes shown vary per file (see iso454812Mapper.js).
+     ===================================================================================== -->
+<div class="report-page">
+  <!-- Static text below is the NORMAL-case title, shown before a file is loaded
+       (and whenever the file turns out to be a normal Multipass test) — see
+       fillSlots' null-handling in reportView.js, which leaves this alone rather
+       than blanking it when the store has no reportTitle yet. iso454812Mapper.js
+       always overwrites this data-slot once a file is analyzed, either with this
+       same string (no visible change) or the "Non-Standard ... Test Reported to
+       ISO 4548-12" variant — title text may morph, but it's never absent. -->
+  <h1 data-slot="reportTitle">ISO 4548-12:2017 — Full-Flow Lubricating Oil Filters — Test Report</h1>
+
+  <h2>Test Identification</h2>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate" data-editable></span></div>
+    <div class="field"><span class="lbl">Test Location:</span><span class="val" data-slot="testLocation" data-editable></span></div>
+    <div class="field"><span class="lbl">Test ID:</span><span class="val" data-slot="testId" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Time:</span><span class="val" data-slot="testTime" data-editable></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator" data-editable></span></div>
+    <div class="field"><span class="lbl">Project:</span><span class="val" data-slot="projectId" data-editable></span></div>
+  </div>
+
+  <h2>Filter Identification</h2>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Filter ID:</span><span class="val" data-slot="filterId" data-editable></span></div>
+    <div class="field"><span class="lbl">Bypass Valve Operative (Yes/No):</span><span class="val" data-slot="bypassValveOperative" data-editable></span></div>
+    <div class="field"><span class="lbl">Fabrication Integrity:</span><span class="val" data-slot="fabricationIntegrity" data-editable></span><span class="unit">hPa</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Housing Type:</span><span class="val" data-slot="housingType" data-editable></span></div>
+    <div class="field"><span class="lbl">Date of Manufacture:</span><span class="val" data-slot="dateOfManufacture" data-editable></span></div>
+    <!-- Only populated on MidstreamFlag (series/dual-filter) files, where "which sensor
+         is selected" means "which of two different filters this report shows" — see
+         iso454812Analysis.js's SENSOR SELECTION note. Blank (empty field, no visible
+         row content) on an ordinary single-filter report. -->
+    <div class="field"><span class="lbl">Filter Analyzed:</span><span class="val" data-slot="analyzedFilterLabel"></span></div>
+  </div>
+
+  <h2>Operating Conditions</h2>
+  <h3>Test Fluid</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="fluidType" data-editable></span></div>
+    <div class="field"><span class="lbl">Viscosity:</span><span class="val" data-slot="viscosity" data-editable></span><span class="unit">mm&sup2;/s</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Initial Conductivity:</span><span class="val" data-slot="initialConductivity" data-editable></span><span class="unit">pS/m</span></div>
+    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature" data-editable></span><span class="unit">&deg;C</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Final Conductivity:</span><span class="val" data-slot="finalConductivity" data-editable></span><span class="unit">pS/m</span></div>
+    <div class="field"></div><!-- empty second column so the lone field stays half-width, not stretched full-page -->
+  </div>
+
+  <h3>Test Dust</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="dustType" data-editable></span></div>
+    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="dustBatch" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Dust added W:</span><span class="val" data-slot="dustAddedW" data-editable></span><span class="unit">g</span></div>
+    <div class="field"><span class="lbl">Injection grav. initial:</span><span class="val" data-slot="injectionGravInitial" data-editable></span><span class="unit">mg/L</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Volume V<sub>i</sub>:</span><span class="val" data-slot="volumeVi" data-editable></span><span class="unit">L</span></div>
+    <div class="field"><span class="lbl">Injection grav. final:</span><span class="val" data-slot="injectionGravFinal" data-editable></span><span class="unit">mg/L</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Injection Flowrate setpoint:</span><span class="val" data-slot="injectionFlowrateSetpoint" data-editable></span><span class="unit">mL/min</span></div>
+    <div class="field"><span class="lbl">Injection grav. Average G<sub>ia</sub>:</span><span class="val" data-slot="injectionGravAverage" data-editable></span><span class="unit">mg/L</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Injection Flowrate Q<sub>ia</sub>:</span><span class="val" data-slot="injectionFlowrateQia" data-editable></span><span class="unit">mL/min</span></div>
+    <div class="field"></div><!-- empty second column so the lone field stays half-width, not stretched full-page -->
+  </div>
+
+  <h3>Test System</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Flowrate Q:</span><span class="val" data-slot="testFlowrateQ" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"><span class="lbl">Initial Cleanliness:</span><span class="val" data-slot="initialCleanliness" data-editable></span><span class="unit">#&gt;10&micro;m/mL</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Volume:</span><span class="val" data-slot="testVolume" data-editable></span><span class="unit">L</span></div>
+    <div class="field"><span class="lbl">Base Gravimetric level G<sub>a</sub>:</span><span class="val" data-slot="baseGravimetricGa" data-editable></span><span class="unit">mg/L</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Final Volume V<sub>f</sub>:</span><span class="val" data-slot="testVolumeFinal" data-editable></span><span class="unit">L</span></div>
+    <div class="field"><span class="lbl">Final Gravimetric Level G<sub>f</sub>:</span><span class="val" data-slot="finalGravimetricGf" data-editable></span><span class="unit">mg/L</span></div>
+  </div>
+
+  <h3>Dilution System</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Sensor Type:</span><span class="val" data-slot="dilutionSensorType" data-editable></span></div>
+    <div class="field"><span class="lbl">Sample time:</span><span class="val" data-slot="sampleTimeS" data-editable></span><span class="unit">s</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Sensor Flow Rate:</span><span class="val" data-slot="sensorFlowRate" data-editable></span><span class="unit">mL/min</span></div>
+    <div class="field"><span class="lbl">Hold time:</span><span class="val" data-slot="holdTimeS" data-editable></span><span class="unit">s</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Sample Flow Rate:</span><span class="val" data-slot="sampleFlowRate" data-editable></span><span class="unit">mL/min</span></div>
+    <div class="field"><span class="lbl">Sampling time:</span><span class="val" data-slot="samplingTimeMin" data-editable></span><span class="unit">min</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Upstream dilution ratio:</span><span class="val" data-slot="upstreamDilutionRatio" data-editable></span></div>
+    <div class="field"><span class="lbl">Number of counts to average:</span><span class="val" data-slot="countsToAverage" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Downstream dilution ratio:</span><span class="val" data-slot="downstreamDilutionRatio" data-editable></span></div>
+    <div class="field"><span class="lbl">Total Counts:</span><span class="val" data-slot="totalCounts" data-editable></span></div>
+  </div>
+
+  <h2>Test Results</h2>
+  <h3>Differential Pressure</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Clean Assy &Delta;P<sub>1</sub>:</span><span class="val" data-slot="dpAssemblyClean"></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Clean Element &Delta;P<sub>2</sub>:</span><span class="val" data-slot="dpElementClean"></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Housing &Delta;P<sub>3</sub>:</span><span class="val" data-slot="dpHousingClean"></span><span class="unit">kPa</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Final Net &Delta;P<sub>5</sub>:</span><span class="val" data-slot="dpFinalNet"></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Termination time:</span><span class="val" data-slot="terminationTime"></span></div>
+  </div>
+
+  <h3>% Net &Delta;P</h3>
+  <table class="datatbl">
+    <thead>
+      <tr><th>% Net &Delta;P</th><td class="betarow">5</td><td class="betarow">10</td><td class="betarow">15</td><td class="betarow">20</td><td class="betarow">40</td><td class="betarow">80</td><td class="betarow">100</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Assy &Delta;P (kPa)</th>
+        <td class="betarow" data-slot="netDp5AssyDp"></td>
+        <td class="betarow" data-slot="netDp10AssyDp"></td>
+        <td class="betarow" data-slot="netDp15AssyDp"></td>
+        <td class="betarow" data-slot="netDp20AssyDp"></td>
+        <td class="betarow" data-slot="netDp40AssyDp"></td>
+        <td class="betarow" data-slot="netDp80AssyDp"></td>
+        <td class="betarow" data-slot="netDp100AssyDp"></td>
+      </tr>
+      <tr>
+        <th>Test Time (h:mm:ss)</th>
+        <td class="betarow" data-slot="netDp5TestTime"></td>
+        <td class="betarow" data-slot="netDp10TestTime"></td>
+        <td class="betarow" data-slot="netDp15TestTime"></td>
+        <td class="betarow" data-slot="netDp20TestTime"></td>
+        <td class="betarow" data-slot="netDp40TestTime"></td>
+        <td class="betarow" data-slot="netDp80TestTime"></td>
+        <td class="betarow" data-slot="netDp100TestTime"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Overall Filter Efficiency</h3>
+  <table class="datatbl eff-table">
+    <thead>
+      <tr>
+        <th>Particle size</th>
+        <td class="betarow" data-slot="effSizeLabel1"></td>
+        <td class="betarow" data-slot="effSizeLabel2"></td>
+        <td class="betarow" data-slot="effSizeLabel3"></td>
+        <td class="betarow" data-slot="effSizeLabel4"></td>
+        <td class="betarow" data-slot="effSizeLabel5"></td>
+        <td class="betarow" data-slot="effSizeLabel6"></td>
+        <td class="betarow" data-slot="effSizeLabel7"></td>
+        <td class="betarow" data-slot="effSizeLabel8"></td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Max. Eff. (%)</th>
+        <td class="betarow" data-slot="effMax1"></td>
+        <td class="betarow" data-slot="effMax2"></td>
+        <td class="betarow" data-slot="effMax3"></td>
+        <td class="betarow" data-slot="effMax4"></td>
+        <td class="betarow" data-slot="effMax5"></td>
+        <td class="betarow" data-slot="effMax6"></td>
+        <td class="betarow" data-slot="effMax7"></td>
+        <td class="betarow" data-slot="effMax8"></td>
+      </tr>
+      <tr>
+        <th>Min. Eff. (%)</th>
+        <td class="betarow" data-slot="effMin1"></td>
+        <td class="betarow" data-slot="effMin2"></td>
+        <td class="betarow" data-slot="effMin3"></td>
+        <td class="betarow" data-slot="effMin4"></td>
+        <td class="betarow" data-slot="effMin5"></td>
+        <td class="betarow" data-slot="effMin6"></td>
+        <td class="betarow" data-slot="effMin7"></td>
+        <td class="betarow" data-slot="effMin8"></td>
+      </tr>
+      <tr>
+        <th>Overall Eff. (%)</th>
+        <td class="betarow" data-slot="effOverall1"></td>
+        <td class="betarow" data-slot="effOverall2"></td>
+        <td class="betarow" data-slot="effOverall3"></td>
+        <td class="betarow" data-slot="effOverall4"></td>
+        <td class="betarow" data-slot="effOverall5"></td>
+        <td class="betarow" data-slot="effOverall6"></td>
+        <td class="betarow" data-slot="effOverall7"></td>
+        <td class="betarow" data-slot="effOverall8"></td>
+      </tr>
+    </tbody>
+  </table>
+  <table class="datatbl eff-table">
+    <thead>
+      <tr>
+        <th>Particle size</th>
+        <td class="betarow" data-slot="effSizeLabel9"></td>
+        <td class="betarow" data-slot="effSizeLabel10"></td>
+        <td class="betarow" data-slot="effSizeLabel11"></td>
+        <td class="betarow" data-slot="effSizeLabel12"></td>
+        <td class="betarow" data-slot="effSizeLabel13"></td>
+        <td class="betarow" data-slot="effSizeLabel14"></td>
+        <td class="betarow" data-slot="effSizeLabel15"></td>
+        <td class="betarow" data-slot="effSizeLabel16"></td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Max. Eff. (%)</th>
+        <td class="betarow" data-slot="effMax9"></td>
+        <td class="betarow" data-slot="effMax10"></td>
+        <td class="betarow" data-slot="effMax11"></td>
+        <td class="betarow" data-slot="effMax12"></td>
+        <td class="betarow" data-slot="effMax13"></td>
+        <td class="betarow" data-slot="effMax14"></td>
+        <td class="betarow" data-slot="effMax15"></td>
+        <td class="betarow" data-slot="effMax16"></td>
+      </tr>
+      <tr>
+        <th>Min. Eff. (%)</th>
+        <td class="betarow" data-slot="effMin9"></td>
+        <td class="betarow" data-slot="effMin10"></td>
+        <td class="betarow" data-slot="effMin11"></td>
+        <td class="betarow" data-slot="effMin12"></td>
+        <td class="betarow" data-slot="effMin13"></td>
+        <td class="betarow" data-slot="effMin14"></td>
+        <td class="betarow" data-slot="effMin15"></td>
+        <td class="betarow" data-slot="effMin16"></td>
+      </tr>
+      <tr>
+        <th>Overall Eff. (%)</th>
+        <td class="betarow" data-slot="effOverall9"></td>
+        <td class="betarow" data-slot="effOverall10"></td>
+        <td class="betarow" data-slot="effOverall11"></td>
+        <td class="betarow" data-slot="effOverall12"></td>
+        <td class="betarow" data-slot="effOverall13"></td>
+        <td class="betarow" data-slot="effOverall14"></td>
+        <td class="betarow" data-slot="effOverall15"></td>
+        <td class="betarow" data-slot="effOverall16"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Filtration Ratio (Micrometer Rating)</h3>
+  <table class="datatbl">
+    <thead>
+      <tr><th>Efficiency (%)</th><td class="betarow">50</td><td class="betarow">75</td><td class="betarow">90</td><td class="betarow">97.8</td><td class="betarow">99</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Micrometer rating (&micro;mC)</th>
+        <td class="betarow" data-slot="micrometerRating50"></td>
+        <td class="betarow" data-slot="micrometerRating75"></td>
+        <td class="betarow" data-slot="micrometerRating90"></td>
+        <td class="betarow" data-slot="micrometerRating97_8"></td>
+        <td class="betarow" data-slot="micrometerRating99"></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="hint">97.8% and 99% ratings are optional, and only expected for high-efficiency filters.</p>
+
+  <h3>Retention Capacity</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Injected Mass M<sub>1</sub>:</span><span class="val" data-slot="injectedMassM1"></span><span class="unit">g</span></div>
+    <div class="field"><span class="lbl">Non-retained mass M<sub>nr</sub>:</span><span class="val" data-slot="nonRetainedMassMnr" data-editable></span><span class="unit">g</span></div>
+    <div class="field"><span class="lbl">Retained capacity C<sub>r</sub>:</span><span class="val" data-slot="retainedCapacityCr" data-editable></span><span class="unit">g</span></div>
+  </div>
+  <!-- Blank (collapsed by app.css's .report-note:empty) except on a Single-Pass /
+       Multipass Series file, where iso454812Mapper.js fills this with why Mnr/Cr
+       above are blank. -->
+  <p class="hint report-note" data-slot="retainedMassNote"></p>
+
+  <h3>Comments</h3>
+  <div class="val comments-box" data-slot="comments" data-editable></div>
+</div>

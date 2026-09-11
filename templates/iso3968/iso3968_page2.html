@@ -1,0 +1,469 @@
+<!-- =====================================================================================
+     iso3968_page2.html — ISO 3968:2017, "Test Results" (per the user's page layout,
+     2026-08-03, reworked 2026-08-03): Average DP table + Bypass Valve Characteristics
+     + Leakage Rate.
+
+     ONE merged table now, not two — per the user, there's no reason for a second
+     full-length tare table: the "Filter housing" columns ARE the tare values, shown
+     alongside the assembly's own columns on the SAME row (row i = the assembly's i-th
+     measured point). A CLOSED set of 4 known row counts (6/12/20/40 — discrete,
+     discrete+reverse, continuous, continuous+reverse — see iso3968Analysis.js's own
+     header note), not an unbounded count — so this is a single static 40-row <tbody>,
+     NOT the fillRepeatablePages page-cloning mechanism ISO 16889 Table B.2 / ISO
+     19438's clump pages use. reportView.js's fillIso3968AverageDpTables fills each row
+     from analysis.points[i] (and analysis.tare.points[i], independently, for the raw
+     "Filter housing" column) if it exists, else toggles .rpt-slot-hidden on that <tr>
+     — same idiom fillB2Clump/fillSizeBlock already use, just applied to a row instead
+     of a page/column.
+
+     7 columns, all computed LIVE at render time (see reportView.js) — nothing here is
+     pre-computed into named store fields, since qR (filterRatedFlowRate, pure hand-
+     entry, no fallback per the user 2026-08-03) is entered AFTER the mapper already
+     ran, and the curve fits/net DP need re-evaluating on every render for the same
+     reason fillSlots itself does:
+       - Measured Flow: this row's own measured flow rate (assembly's point).
+       - Flow Ratio (qV/qR, %): BLANK unless the user has hand-entered qR — no assumed
+         fallback (an earlier "max configured flow = 120% of qR" assumption was
+         removed; see reportView.js's own note).
+       - Filter Assembly ΔP: this row's raw measured ΔP.
+       - Filter Assembly Curve Fit ΔP: the assembly's own ΔP=aQ+bQ² fit (see
+         iso3968Analysis.js's fitQuadraticNoIntercept), evaluated at this row's flow.
+       - Filter Housing ΔP (Tare): the tare run's OWN i-th raw point — blank once i
+         exceeds however many points the tare run itself produced (no assumption that
+         the two runs share a point count).
+       - Filter Housing Curve Fit ΔP: the tare's fit curve, evaluated at THIS row's
+         (assembly's) measured flow — this is what actually lines the two runs up when
+         their raw flow points don't match, which the user confirmed is the normal case.
+       - Filter Element ΔP (Assembly − Tare): the DIFFERENCE OF THE TWO CURVE FITS
+         (assemblyFitDP − housingFitDP), not raw − raw — per the user, "relative
+         differential based on the curve is ideal" because of that same mismatch.
+     Blank (not "0"/"NaN") wherever a fit isn't available yet (no tare supplied, or too
+     few points to fit a curve).
+
+     Bypass Valve Characteristics and Leakage Rate are ALL pure hand-entry
+     (data-editable, no fallback) — the software has no way to measure them at all,
+     confirmed by the user. Leakage Rate's 4 rows (50/75/100/120% opening pressure)
+     are fixed, not data-driven — the percentages are static labels. ===============
+     ===================================================================== -->
+<div class="report-page">
+  <h2>Differential Pressure versus Flow Rate</h2>
+  <h3>Average &Delta;P (kPa)</h3>
+  <table class="datatbl" id="pqAverageDpTable">
+    <thead>
+      <tr>
+        <th>Measured Flow<br>(L/min)</th>
+        <th>Flow Ratio<br>q<sub>V</sub>/q<sub>R</sub> (%)</th>
+        <th>Filter Assembly<br>&Delta;P</th>
+        <th>Filter Assembly<br>Curve Fit &Delta;P</th>
+        <th>Filter Housing<br>&Delta;P (Tare)</th>
+        <th>Filter Housing<br>Curve Fit &Delta;P</th>
+        <th>Filter Element &Delta;P<br>(Assembly &minus; Tare)</th>
+      </tr>
+    </thead>
+    <tbody id="pqAverageDpRows">
+      <tr data-row-slot="1">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="2">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="3">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="4">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="5">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="6">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="7">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="8">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="9">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="10">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="11">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="12">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="13">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="14">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="15">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="16">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="17">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="18">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="19">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="20">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="21">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="22">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="23">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="24">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="25">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="26">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="27">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="28">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="29">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="30">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="31">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="32">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="33">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="34">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="35">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="36">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="37">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="38">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="39">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+      <tr data-row-slot="40">
+        <td data-field="flow"></td>
+        <td data-field="ratio"></td>
+        <td data-field="assembly"></td>
+        <td data-field="assemblyFit"></td>
+        <td data-field="housing"></td>
+        <td data-field="housingFit"></td>
+        <td data-field="element"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Bypass Valve Characteristics</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Opening pressure:</span><span class="val" data-slot="bypassOpeningPressure" data-editable></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Opening flow rate:</span><span class="val" data-slot="bypassOpeningFlowRate" data-editable></span><span class="unit">L/min</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Closing pressure:</span><span class="val" data-slot="bypassClosingPressure" data-editable></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Closing flow rate:</span><span class="val" data-slot="bypassClosingFlowRate" data-editable></span><span class="unit">L/min</span></div>
+  </div>
+
+  <h3>Leakage Rate</h3>
+  <table class="datatbl">
+    <thead>
+      <tr>
+        <th>% Opening pressure</th>
+        <th>Pressure (kPa)</th>
+        <th>Average leakage rate (mL/min)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>50</td>
+        <td><span class="val" data-slot="leak50Pressure" data-editable></span></td>
+        <td><span class="val" data-slot="leak50Rate" data-editable></span></td>
+      </tr>
+      <tr>
+        <td>75</td>
+        <td><span class="val" data-slot="leak75Pressure" data-editable></span></td>
+        <td><span class="val" data-slot="leak75Rate" data-editable></span></td>
+      </tr>
+      <tr>
+        <td>100</td>
+        <td><span class="val" data-slot="leak100Pressure" data-editable></span></td>
+        <td><span class="val" data-slot="leak100Rate" data-editable></span></td>
+      </tr>
+      <tr>
+        <td>120</td>
+        <td><span class="val" data-slot="leak120Pressure" data-editable></span></td>
+        <td><span class="val" data-slot="leak120Rate" data-editable></span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

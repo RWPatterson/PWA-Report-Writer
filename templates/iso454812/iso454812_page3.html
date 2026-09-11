@@ -1,0 +1,37 @@
+<!-- =====================================================================================
+     iso454812_page3.html — ISO 4548-12:2017, Figure B.1 (Differential Pressure vs.
+     Time), one figure per page. The original outline specified each of B.1/B.2/B.3 on
+     its own page; an interim two-per-page layout was tried but capped each figure at
+     roughly half a sheet, which both wasted vertical space and left no room for the
+     right axis's % net ΔP milestone labels. One-per-page gives each figure ~8in of
+     height — labels fit, and the plot fills the page.
+
+     Layout: .figure-page is a flex column (see app.css). The identification header
+     and caption take their natural heights; the .figure-wrap between them is flex:1,
+     so it GROWS to consume all remaining page height — the chart therefore fills
+     whatever space is left, self-adjusting to the header/caption sizes instead of a
+     hand-computed fixed height that has to be re-tuned every time those change.
+
+     The chart canvas is drawn by reportView.js's fillReportCharts, matched on
+     data-report-chart. The identification header's [data-slot] fields also keep this
+     page in refreshReport's "has data-slot, so re-fill on unit toggle" set, which is
+     what re-runs the chart draw when units change. -->
+<div class="report-page figure-page single-fig">
+  <h1>ISO 4548-12:2017 — Figure B.1</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Test Location:</span><span class="val" data-slot="testLocation"></span></div>
+    <div class="field"><span class="lbl">Test ID:</span><span class="val" data-slot="testId"></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Time:</span><span class="val" data-slot="testTime"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Project:</span><span class="val" data-slot="projectId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="dpVsTime"></canvas>
+  </div>
+  <p class="figure-caption">Figure B.1 — Differential Pressure vs. Time</p>
+  <div class="axis-controls-mount" data-axis-controls-for="dpVsTime"></div>
+</div>

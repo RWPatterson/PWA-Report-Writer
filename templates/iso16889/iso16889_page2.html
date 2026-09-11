@@ -1,0 +1,294 @@
+<!-- =====================================================================================
+     iso16889_page2.html — ISO 16889:2022, Page 2 (Particle Counts per Millilitre and
+     Filtration Ratio). A single, fully static page — every row AND every column this
+     table could ever need (1 Initial + 10 clumps x 3 rows [Up/Down/ß] + 1 Avg x 3 rows =
+     34 rows; 2 label columns + all 16 possible display-size columns = 18 columns) is
+     already present here, in this file, before any JS runs. Opening this file directly
+     shows the complete grid shape — nothing about this table's STRUCTURE is built at
+     render time.
+
+     reportView.js's fillTable16889Page2 only ever does two things to this markup: sets
+     .textContent on a .w16889-size-col cell that already exists (never creates one), and
+     toggles the shared rpt-slot-hidden class (app.css) on any size column beyond however
+     many are actually selected (Select Display Sizes can choose fewer than 16) — a plain,
+     ordinary display:none per cell, on a count the app already knows exactly, not a
+     runtime measurement/guess. Each of the 18 .w16889-size-col cells in a row is filled
+     by ITS POSITION (document order) matching the same index into resolvedDisplaySizes/
+     clump arrays every row uses — no per-cell id needed.
+
+     Earlier versions of this file dynamically APPENDED the 16 size columns via JS
+     (el("th",...)/el("td",...) in a loop) — the table had NO real shape until a file
+     loaded. That cost several real-print round trips to get print-sized right (a
+     scrollbar baked into a printed page, wrong column counts, over-rounded values, a
+     uniform-scale JS workaround that read as an ugly stretch, and — even after this
+     static rewrite — three straight hand-calculated font-size/padding guesses that each
+     turned out wrong, one silently dropping 3 of 18 columns off the printed page via
+     .w16889-p2-page's own overflow:hidden). The column-count losses in particular
+     mattered more than the sizing misses: this is REAL data quietly not showing up on a
+     physical report. app.css's print rule for .w16889-p2-table now uses table-layout:
+     fixed with the <colgroup> below instead of trying to calculate an exact width fit —
+     column width becomes a structural guarantee (the table physically cannot exceed its
+     container), with wrapping (white-space:normal + overflow-wrap:break-word) as the
+     safety valve for any single value that doesn't fit its column, rather than overflow
+     or a guess about font-size ever being able to silently lose a column again. */
+
+     Landscape print — the rotate-in-place technique, not CSS named pages:
+     .w16889-p2-page is sized (in app.css's @media print block) to the PORTRAIT page's
+     own usable content area; .w16889-p2-rotate is sized to the LANDSCAPE footprint
+     (those same two dimensions swapped) and rotated 90deg + translated back into view
+     (rotate(90deg) translateY(-100%) — a standard, long-supported "rotate a whole
+     content block for a sideways print" trick built from plain transform/position, not
+     from CSS Paged Media's per-element orientation switching, which was tried FIRST and
+     confirmed by a real print not to work at all — the physical sheet stayed portrait-
+     shaped, content just got shrunk to fit rather than the page rotating).
+     On screen, none of this applies — .w16889-p2-scroll's horizontal scrollbar is the
+     only screen-side accommodation, unlikely to ever be needed at 18 real columns. -->
+<div class="report-page w16889-p2-page">
+  <div class="w16889-p2-rotate">
+    <h2>Particle Counts per Millilitre and Filtration Ratio</h2>
+    <div class="field-row">
+      <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+      <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+      <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+    </div>
+    <div class="w16889-p2-scroll">
+      <table class="datatbl w16889-p2-table">
+        <colgroup>
+          <col style="width: 6%"><col style="width: 6%">
+          <col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group">
+          <col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group">
+          <col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group">
+          <col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group"><col class="w16889-size-col-group">
+        </colgroup>
+        <thead>
+          <tr class="w16889-p2-header">
+            <th colspan="2">Time Interval</th>
+            <th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th>
+            <th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th>
+            <th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th>
+            <th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th><th class="w16889-size-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-row="initial">
+            <th colspan="2">Initial</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="10-up"><th rowspan="3">10%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="10-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="10-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="20-up"><th rowspan="3">20%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="20-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="20-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="30-up"><th rowspan="3">30%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="30-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="30-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="40-up"><th rowspan="3">40%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="40-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="40-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="50-up"><th rowspan="3">50%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="50-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="50-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="60-up"><th rowspan="3">60%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="60-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="60-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="70-up"><th rowspan="3">70%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="70-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="70-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="80-up"><th rowspan="3">80%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="80-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="80-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="90-up"><th rowspan="3">90%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="90-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="90-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="100-up"><th rowspan="3">100%</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="100-down"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="100-beta"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+
+          <tr data-row="avg-up" class="w16889-avg-row"><th rowspan="3">Avg.</th><th>Up</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="avg-down" class="w16889-avg-row"><th>Down</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+          <tr data-row="avg-beta" class="w16889-avg-row"><th>ß</th>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+            <td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td><td class="w16889-size-col"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">"--" marks initial cleanliness data not available in this file. A blank Up/Down/ß row (typically 10%, on a short test) means that reporting-time window falls entirely within the standard's mandatory first-3-minutes disregard period — there is genuinely no data to report for it, not a missing value.</p>
+  </div>
+</div>

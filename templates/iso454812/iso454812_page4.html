@@ -1,0 +1,38 @@
+<!-- =====================================================================================
+     iso454812_page4.html — ISO 4548-12:2017, Figures B.2 AND B.3 on one page.
+     B.2 (linear) and B.3 (log) plot the SAME overall-efficiency-vs-size data at two
+     Y scales, so they pair naturally on one sheet — and neither has the crowded dual
+     axes / milestone labels that make Figure B.1 want a full page to itself (B.1 is
+     alone on page 3 for exactly that reason). Two figures per page here is the
+     deliberate middle ground between the cramped all-figures-share and the
+     one-figure-per-page over-correction.
+
+     Both charts sit in the same .figure-page flex column, each in a .figure-wrap with
+     flex:1 (app.css) — so the two split the page's remaining height evenly, one above
+     the other, each getting ~half the sheet. See iso454812_page3.html for the
+     flex-fill rationale. -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 4548-12:2017 — Figures B.2 &amp; B.3</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Test Location:</span><span class="val" data-slot="testLocation"></span></div>
+    <div class="field"><span class="lbl">Test ID:</span><span class="val" data-slot="testId"></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Time:</span><span class="val" data-slot="testTime"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Project:</span><span class="val" data-slot="projectId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="effLinear"></canvas>
+  </div>
+  <p class="figure-caption">Figure B.2 — Overall Efficiency vs. Particle Size</p>
+  <div class="axis-controls-mount" data-axis-controls-for="effLinear"></div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="effLog"></canvas>
+  </div>
+  <p class="figure-caption">Figure B.3 — Overall Efficiency vs. Particle Size (log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="effLog"></div>
+</div>

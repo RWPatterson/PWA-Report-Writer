@@ -1,0 +1,26 @@
+<!-- =====================================================================================
+     iso23369_page4.html — ISO 23369:2022, Figure C.3 (Filtration Ratio vs. % Test
+     Time, multi-series semi-log) AND Figure C.4 (Filtration Ratio vs. Element ΔP,
+     multi-series log-log). Same double-fig pairing convention as page 3 — own copy
+     of iso16889_page4.html's own C.4+C.5 pairing, per CLAUDE.md. Both figures here
+     can carry up to 16 series (one per selected display size). -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 23369:2022 — Figures C.3 &amp; C.4</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="ratioVsTime23369"></canvas>
+  </div>
+  <p class="figure-caption">Figure C.3 — Filtration Ratio vs. Percent Test Time (log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="ratioVsTime23369"></div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="ratioVsPressure23369"></canvas>
+  </div>
+  <p class="figure-caption">Figure C.4 — Filtration Ratio vs. Element Differential Pressure (log-log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="ratioVsPressure23369"></div>
+</div>

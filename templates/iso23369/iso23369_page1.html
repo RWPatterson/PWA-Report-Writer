@@ -1,0 +1,255 @@
+<!-- =====================================================================================
+     iso23369_page1.html — ISO 23369:2022, Page 1 (Filter/Element Identification,
+     Operating Conditions, Test Results). Clean build against the standard's own
+     outline text, own template — own copy of iso16889_page1.html's shape (per
+     CLAUDE.md, report content is never shared between standards), adapted for this
+     standard's own cyclic-flow fields (q&#772;/q_min/q_max/Ramp Time instead of a
+     single steady flow rate) and its own "a" filtration-ratio symbol.
+
+     Units printed via a trailing <span class="unit"> after the value, not in the
+     label — same convention as every other clean standard's Page 1.
+     ===================================================================================== -->
+<div class="report-page w23369-page1">
+  <!-- Static text below is the NORMAL-case title, shown before a file is loaded —
+       see fillSlots' null-handling in reportView.js. iso23369Mapper.js always
+       overwrites this data-slot once a file is analyzed, either with this same
+       string or the "Non-Standard ... Test Reported to ISO 23369" variant. -->
+  <h1 data-slot="reportTitle">ISO 23369:2022 — Multi-Pass Test Under Cyclic Flow Conditions Report</h1>
+
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Laboratory:</span><span class="val" data-slot="testLab" data-editable></span></div>
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate" data-editable></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator" data-editable></span></div>
+  </div>
+
+  <h2>Filter and Element Identification</h2>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId" data-editable></span></div>
+    <div class="field"><span class="lbl">Housing ID:</span><span class="val" data-slot="housingId" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Spin-on (Yes/No):</span><span class="val" data-slot="spinOn" data-editable></span></div>
+    <div class="field"><span class="lbl">Element first bubble point:</span><span class="val" data-slot="minBubblePoint" data-editable></span><span class="unit">Pa</span></div>
+  </div>
+  <!-- Only populated on MidstreamFlag (series/dual-filter) files — see
+       iso23369Analysis.js's sensor-selection generality, own copy of ISO 16889's
+       identical-purpose field. Blank on an ordinary single-filter report. -->
+  <div class="field-row">
+    <div class="field"><span class="lbl">Filter Analyzed:</span><span class="val" data-slot="analyzedFilterLabel"></span></div>
+    <div class="field"></div><!-- empty second column so the lone field stays half-width, not stretched full-page -->
+  </div>
+
+  <h2>Operating Conditions</h2>
+  <h3>Test Fluid</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="fluidType" data-editable></span></div>
+    <div class="field"><span class="lbl">Ref.:</span><span class="val" data-slot="fluidRef" data-editable></span></div>
+    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="fluidBatch" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Viscosity at test temperature:</span><span class="val" data-slot="viscosity" data-editable></span><span class="unit">mm&sup2;/s</span></div>
+    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature" data-editable></span><span class="unit">&deg;C</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Anti-static (Yes/No):</span><span class="val" data-slot="antiStaticYesNo" data-editable></span></div>
+    <div class="field"><span class="lbl">Anti-static Type:</span><span class="val" data-slot="antiStaticType" data-editable></span></div>
+    <div class="field"><span class="lbl">Conductivity:</span><span class="val" data-slot="conductivity" data-editable></span><span class="unit">pS/m</span></div>
+  </div>
+
+  <h3>Test Contaminant</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="contaminantType" data-editable></span></div>
+    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="contaminantBatch" data-editable></span></div>
+  </div>
+
+  <h3>Test System</h3>
+  <!-- q&#772; (average), q_min, q_max — this standard's own 10.2.1, no single steady
+       flow rate the way ISO 16889 has. Ramp Time is the cyclic flow transition
+       duration (11.8/figure 2) — see iso23369Mapper.js's RiseTime/RampUpTime note. -->
+  <div class="field-row">
+    <div class="field"><span class="lbl">Flow rate, q&#772;:</span><span class="val" data-slot="testFlowrateQ" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"><span class="lbl">Initial volume:</span><span class="val" data-slot="testVolume" data-editable></span><span class="unit">L</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">q<sub>min</sub>:</span><span class="val" data-slot="qMinFlow" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">q<sub>max</sub>:</span><span class="val" data-slot="qMaxFlow" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Ramp Time, t<sub>R,F</sub>:</span><span class="val" data-slot="rampTime" data-editable></span><span class="unit">sec</span></div>
+    <div class="field"><span class="lbl">Final volume:</span><span class="val" data-slot="testVolumeFinal" data-editable></span><span class="unit">L</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Base upstream concentration, c&#772;<sub>b</sub>:</span><span class="val" data-slot="baseUpstreamGravLevel" data-editable></span><span class="unit">mg/L</span></div>
+    <div class="field"></div>
+  </div>
+
+  <h3>Injection System</h3>
+  <table class="datatbl">
+    <thead>
+      <tr><th>Injection parameters</th><th>Initial</th><th>Final</th><th>Average injection parameters</th><th></th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>System volume (L)</th>
+        <td class="val" data-slot="injSystemVolumeInitial" data-editable></td>
+        <td class="val" data-slot="injSystemVolumeFinal" data-editable></td>
+        <th>Injection flow q&#772;<sub>i</sub> (L/min)</th>
+        <td class="val" data-slot="injectionFlowrateQia" data-editable></td>
+      </tr>
+      <tr>
+        <th>Concentration (mg/L)</th>
+        <td class="val" data-slot="injectionGravInitial" data-editable></td>
+        <td class="val" data-slot="injectionGravFinal" data-editable></td>
+        <th>Concentration c&#772;<sub>i</sub> (mg/L)</th>
+        <td class="val" data-slot="injectionGravAverage" data-editable></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Counting System</h3>
+  <table class="datatbl">
+    <thead>
+      <tr><th>Location</th><th>Counter and sensor ref.</th><th>Flow rate (mL/min)</th><th>Dilution Ratio</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Upstream</th>
+        <td class="val" data-slot="counterUpstream" data-editable></td>
+        <td class="val" data-slot="sensorFlowRateUpstream" data-editable></td>
+        <td class="val" data-slot="dilutionRatioUpstream" data-editable></td>
+      </tr>
+      <tr>
+        <th>Downstream</th>
+        <td class="val" data-slot="counterDownstream" data-editable></td>
+        <td class="val" data-slot="sensorFlowRateDownstream" data-editable></td>
+        <td class="val" data-slot="dilutionRatioDownstream" data-editable></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Counter calibration method:</span><span class="val" data-slot="counterCalMethod" data-editable></span></div>
+    <div class="field"><span class="lbl">Counter calibration date:</span><span class="val" data-slot="counterCalDate" data-editable></span></div>
+  </div>
+
+  <h2>Test Results</h2>
+  <h3>Element Integrity</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Bubble point to ISO 2942:</span><span class="val" data-slot="bubblePointISO2942" data-editable></span><span class="unit">Pa</span></div>
+    <div class="field"><span class="lbl">Wetting fluid:</span><span class="val" data-slot="elementIntegrityTestFluid" data-editable></span></div>
+  </div>
+
+  <h3>Differential Pressure (&Delta;p)</h3>
+  <!-- Blank (collapsed by app.css's .report-note:empty) unless no cyclic companion
+       file was supplied — see iso23369Analysis.js's companionFileMissing note; the
+       report still renders, using the primary file's coarser samples. -->
+  <p class="hint report-note" data-slot="companionFileNote"></p>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Filter housing:</span><span class="val" data-slot="dpHousingClean"></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Clean assembly:</span><span class="val" data-slot="dpAssemblyClean"></span><span class="unit">kPa</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Clean element:</span><span class="val" data-slot="dpElementClean"></span><span class="unit">kPa</span></div>
+    <div class="field"><span class="lbl">Final element:</span><span class="val" data-slot="dpElementFinal"></span><span class="unit">kPa</span></div>
+  </div>
+
+  <h3>Differential Pressure versus Contaminant Added</h3>
+  <table class="datatbl">
+    <thead>
+      <tr>
+        <th>Time interval %</th><th>Test time (h:mm:ss)</th><th>Element &Delta;p (kPa)</th><th>Injected mass (g)</th>
+        <th>Time interval %</th><th>Test time (h:mm:ss)</th><th>Element &Delta;p (kPa)</th><th>Injected mass (g)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="betarow">10</td>
+        <td class="val" data-slot="dpClump10TestTime"></td>
+        <td class="val" data-slot="dpClump10ElementDp"></td>
+        <td class="val" data-slot="dpClump10InjectedMass"></td>
+        <td class="betarow">60</td>
+        <td class="val" data-slot="dpClump60TestTime"></td>
+        <td class="val" data-slot="dpClump60ElementDp"></td>
+        <td class="val" data-slot="dpClump60InjectedMass"></td>
+      </tr>
+      <tr>
+        <td class="betarow">20</td>
+        <td class="val" data-slot="dpClump20TestTime"></td>
+        <td class="val" data-slot="dpClump20ElementDp"></td>
+        <td class="val" data-slot="dpClump20InjectedMass"></td>
+        <td class="betarow">70</td>
+        <td class="val" data-slot="dpClump70TestTime"></td>
+        <td class="val" data-slot="dpClump70ElementDp"></td>
+        <td class="val" data-slot="dpClump70InjectedMass"></td>
+      </tr>
+      <tr>
+        <td class="betarow">30</td>
+        <td class="val" data-slot="dpClump30TestTime"></td>
+        <td class="val" data-slot="dpClump30ElementDp"></td>
+        <td class="val" data-slot="dpClump30InjectedMass"></td>
+        <td class="betarow">80</td>
+        <td class="val" data-slot="dpClump80TestTime"></td>
+        <td class="val" data-slot="dpClump80ElementDp"></td>
+        <td class="val" data-slot="dpClump80InjectedMass"></td>
+      </tr>
+      <tr>
+        <td class="betarow">40</td>
+        <td class="val" data-slot="dpClump40TestTime"></td>
+        <td class="val" data-slot="dpClump40ElementDp"></td>
+        <td class="val" data-slot="dpClump40InjectedMass"></td>
+        <td class="betarow">90</td>
+        <td class="val" data-slot="dpClump90TestTime"></td>
+        <td class="val" data-slot="dpClump90ElementDp"></td>
+        <td class="val" data-slot="dpClump90InjectedMass"></td>
+      </tr>
+      <tr>
+        <td class="betarow">50</td>
+        <td class="val" data-slot="dpClump50TestTime"></td>
+        <td class="val" data-slot="dpClump50ElementDp"></td>
+        <td class="val" data-slot="dpClump50InjectedMass"></td>
+        <td class="betarow">100</td>
+        <td class="val" data-slot="dpClump100TestTime"></td>
+        <td class="val" data-slot="dpClump100ElementDp"></td>
+        <td class="val" data-slot="dpClump100InjectedMass"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Retention Capacity</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">ISO MTD mass injected, m<sub>i</sub>:</span><span class="val" data-slot="isoMtdMassInjected"></span><span class="unit">g</span></div>
+    <div class="field"><span class="lbl">ISO MTD retained capacity, m<sub>R</sub>:</span><span class="val" data-slot="isoMtdRetainedCapacity"></span><span class="unit">g</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">80% upstream concentration, c<sub>80</sub>:</span><span class="val" data-slot="finalGravimetricGf" data-editable></span><span class="unit">mg/L</span></div>
+    <div class="field"></div><!-- empty second column so the lone field stays half-width, not stretched full-page -->
+  </div>
+  <!-- Blank (collapsed by app.css's .report-note:empty) except on a Cyclic Series
+       Multipass file, or a dual-filter Test Setup, where iso23369Mapper.js fills
+       this with why ISO MTD retained capacity above is blank. -->
+  <p class="hint report-note" data-slot="retainedMassNote"></p>
+
+  <h3>Filtration Ratio a<sub>x</sub>(c)</h3>
+  <table class="datatbl">
+    <thead>
+      <tr><th>Average filtration ratio</th><td class="betarow">2</td><td class="betarow">10</td><td class="betarow">75</td><td class="betarow">100</td><td class="betarow">200</td><td class="betarow">1,000</td></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Particle size, &micro;m(c)</th>
+        <td class="betarow" data-slot="sizeAtRatio2"></td>
+        <td class="betarow" data-slot="sizeAtRatio10"></td>
+        <td class="betarow" data-slot="sizeAtRatio75"></td>
+        <td class="betarow" data-slot="sizeAtRatio100"></td>
+        <td class="betarow" data-slot="sizeAtRatio200"></td>
+        <td class="betarow" data-slot="sizeAtRatio1000"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Comments</h3>
+  <div class="val comments-box" data-slot="comments" data-editable></div>
+</div>

@@ -1,0 +1,30 @@
+<!-- =====================================================================================
+     iso19438_page3.html — ISO 19438:2023, Figure B.2 (Differential Pressure vs. Test
+     Time), one figure per page — mirrors iso454812_page3.html's single-fig layout
+     (see that file's own note on why a dual-axis figure needs the full page). Note
+     the NUMBERING SWAP vs. ISO 4548-12: 19438's DP figure is B.2, not B.1.
+
+     data-report-chart="dpVsTime19438" (not the bare "dpVsTime" ISO 4548-12 uses) —
+     deliberately distinct canvas/override-scoping key, see reportView.js's
+     fillReportCharts note on why. renderDPFigureChart's rightAxisMode:"even" (also
+     wired in reportView.js) gives this figure's right axis 19438's plain -10%-to-
+     110% ticks instead of 4548-12's 7 milestone-snapped ones — chartView.js. -->
+<div class="report-page figure-page single-fig">
+  <h1>ISO 19438:2023 — Figure B.2</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Test Location:</span><span class="val" data-slot="testLocation"></span></div>
+    <div class="field"><span class="lbl">Test ID:</span><span class="val" data-slot="testId"></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Time:</span><span class="val" data-slot="testTime"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Project:</span><span class="val" data-slot="projectId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="dpVsTime19438"></canvas>
+  </div>
+  <p class="figure-caption">Figure B.2 — Differential Pressure vs. Test Time</p>
+  <div class="axis-controls-mount" data-axis-controls-for="dpVsTime19438"></div>
+</div>

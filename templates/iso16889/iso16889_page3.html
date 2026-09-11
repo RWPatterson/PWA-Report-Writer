@@ -1,0 +1,30 @@
+<!-- =====================================================================================
+     iso16889_page3.html — ISO 16889:2022, Figures C.2 (Differential Pressure vs.
+     Contaminant Injected) AND C.3 (Overall Average Filtration Ratio vs. Particle
+     Size, semi-log). Paired on one page — same "double-fig" reasoning as
+     iso454812_page4.html's own B.2+B.3 pairing: neither figure here has crowded
+     dual axes needing a full page to itself (C.2 has no secondary axis at all,
+     unlike 4548-12/19438's own DP-vs-time figures — the standard doesn't ask for
+     one on this figure). Two figures per page, same .figure-page flex-column /
+     .figure-wrap flex:1 split as every other double-fig page in this app (see
+     app.css). -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 16889:2022 — Figures C.2 &amp; C.3</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="massPressure16889"></canvas>
+  </div>
+  <p class="figure-caption">Figure C.2 — Differential Pressure vs. Contaminant Injected</p>
+  <div class="axis-controls-mount" data-axis-controls-for="massPressure16889"></div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="filtrationRatio16889"></canvas>
+  </div>
+  <p class="figure-caption">Figure C.3 — Overall Average Filtration Ratio vs. Particle Size (log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="filtrationRatio16889"></div>
+</div>

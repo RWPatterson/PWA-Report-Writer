@@ -1,0 +1,29 @@
+<!-- =====================================================================================
+     iso16889_page4.html — ISO 16889:2022, Figures C.4 (Filtration Ratio vs. % Test
+     Time, multi-series semi-log) AND C.5 (Filtration Ratio vs. Element ΔP,
+     multi-series log-log). Same double-fig pairing convention as page 3 — see that
+     template's own header comment. Both figures here can carry up to 16 series
+     (one per selected display size); the legend (see chartView.js's
+     renderBetaVsTimeFigureChart/renderBetaVsPressureFigureChart) uses a smaller
+     font than a single-series figure's would need, to keep that many entries
+     readable. -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 16889:2022 — Figures C.4 &amp; C.5</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="betaVsTime16889"></canvas>
+  </div>
+  <p class="figure-caption">Figure C.4 — Filtration Ratio vs. Percent Test Time (log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="betaVsTime16889"></div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="betaVsPressure16889"></canvas>
+  </div>
+  <p class="figure-caption">Figure C.5 — Filtration Ratio vs. Element Differential Pressure (log-log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="betaVsPressure16889"></div>
+</div>

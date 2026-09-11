@@ -1,0 +1,29 @@
+<!-- =====================================================================================
+     iso16889_page5.html — ISO 16889:2022, "Add Count Details" (OPTIONAL page — only
+     rendered when the report toolbar's "Add Count Details" checkbox is on, see
+     iso16889Pages.js's `optional: true` and app.js's pagesForCurrentStandard).
+
+     Two charts, same double-fig layout as page 4: Upstream Counts vs. Time and
+     Downstream Counts vs. Time, one line per currently-selected display size (see
+     reportView.js's buildCountsVsTimeData). Downstream's Y axis is user-editable (see
+     its axis-controls-mount below); Upstream has no edit control at all — both default
+     to the same 0-to-max-upstream-count ceiling. -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 16889:2022 — Add Count Details</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Element ID:</span><span class="val" data-slot="elementId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="upstreamCountsVsTime16889"></canvas>
+  </div>
+  <p class="figure-caption">Upstream Counts vs. Time</p>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="downstreamCountsVsTime16889"></canvas>
+  </div>
+  <p class="figure-caption">Downstream Counts vs. Time</p>
+  <div class="axis-controls-mount" data-axis-controls-for="downstreamCountsVsTime16889"></div>
+</div>

@@ -1,0 +1,64 @@
+<!-- =====================================================================================
+     iso3968_page1.html — ISO 3968:2017, "Table 3 - Report Sheet" (per the user's page
+     layout, 2026-08-03) + Figure 4 (Differential pressure versus flow rate) on the
+     SAME page — confirmed with the user during planning, not the "one figure per own
+     page" convention the other three standards use for their DP-vs-time figures.
+
+     Static text labels, same convention as iso454812_page1.html (own report copy
+     fully contained in this file, not the data-label indirection ISO 16889 uses).
+
+     Test Laboratory, Housing Identification, Filter rated flow rate (qR),
+     Substitute element Yes/No + Description, Test Fluid Ref, and Initial cleanliness
+     are all data-editable with NO fallback (pure hand-entry — see iso3968Mapper.js's
+     NOT AVAILABLE note). qR specifically is load-bearing for Page 2's Flow Ratio
+     column, computed live at render time, not here.
+
+     Figure 4's canvas print height is NOT yet tuned against a real printed sheet
+     (this page mixes fixed content above the chart, unlike the other standards'
+     dedicated one-figure-per-page layout, which has no direct precedent for this
+     shape) — see the .iso3968-page1 print rule in app.css, flagged there as a
+     first-pass estimate. ===================================================== -->
+<div class="report-page iso3968-page1">
+  <h1 data-slot="reportTitle">ISO 3968:2017 — Table 3, Report Sheet</h1>
+
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Laboratory:</span><span class="val" data-slot="testLaboratory" data-editable></span></div>
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate" data-editable></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator" data-editable></span></div>
+  </div>
+
+  <h2>Filter and Element Identification</h2>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Element Identification:</span><span class="val" data-slot="elementIdentification" data-editable></span></div>
+    <div class="field"><span class="lbl">Housing Identification:</span><span class="val" data-slot="housingIdentification" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Spin On (Yes/No):</span><span class="val" data-slot="spinOn"></span></div>
+    <div class="field"><span class="lbl">Filter rated flow rate q<sub>R</sub>:</span><span class="val" data-slot="filterRatedFlowRate" data-editable></span><span class="unit">L/min</span><span class="field-info" title="Fill this in to show the Flow Ratio (qV/qR) column on Page 2 — it stays blank otherwise.">&#9432;</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Substitute element (Yes/No):</span><span class="val" data-slot="substituteElement" data-editable></span></div>
+    <div class="field"><span class="lbl">Description:</span><span class="val" data-slot="substituteElementDescription" data-editable></span></div>
+  </div>
+
+  <h2>Operating Conditions</h2>
+  <h3>Test Fluid</h3>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="testFluidType" data-editable></span></div>
+    <div class="field"><span class="lbl">Ref:</span><span class="val" data-slot="testFluidRef" data-editable></span></div>
+    <div class="field"><span class="lbl">Batch no.:</span><span class="val" data-slot="testFluidBatch" data-editable></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Viscosity at the test temperature:</span><span class="val" data-slot="viscosity" data-editable></span><span class="unit">mm&sup2;/s</span></div>
+    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature" data-editable></span><span class="unit">&deg;C</span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Initial cleanliness level, ISO 4406 code:</span><span class="val" data-slot="initialCleanliness" data-editable></span></div>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas data-report-chart="pq3968"></canvas>
+  </div>
+  <p class="figure-caption">Figure 4 — Differential pressure versus flowrate</p>
+  <div class="axis-controls-mount" data-axis-controls-for="pq3968"></div>
+</div>

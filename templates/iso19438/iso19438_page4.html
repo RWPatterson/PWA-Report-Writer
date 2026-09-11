@@ -1,0 +1,37 @@
+<!-- =====================================================================================
+     iso19438_page4.html — ISO 19438:2023, Figures B.1 AND B.3 on one page. Both plot
+     the SAME Overall Efficiency vs. Particle Size data at two Y scales (linear/log),
+     so they pair naturally — mirrors iso454812_page4.html's double-fig layout (see
+     that file's own note on the page-grouping rationale). Note the NUMBERING SWAP
+     vs. ISO 4548-12: 19438's two efficiency figures are B.1 and B.3, not B.2/B.3 —
+     its DP figure (B.2) stands alone on page 3 instead.
+
+     data-report-chart="effLinear19438"/"effLog19438" (not the bare "effLinear"/
+     "effLog" ISO 4548-12 uses) — see reportView.js's fillReportCharts note.
+     renderEfficiencyFigureChart itself is REUSED AS-IS from ISO 4548-12 (no 19438-
+     specific chart code needed) — it's already standard-agnostic (chartView.js). -->
+<div class="report-page figure-page double-fig">
+  <h1>ISO 19438:2023 — Figures B.1 &amp; B.3</h1>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+    <div class="field"><span class="lbl">Test Location:</span><span class="val" data-slot="testLocation"></span></div>
+    <div class="field"><span class="lbl">Test ID:</span><span class="val" data-slot="testId"></span></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><span class="lbl">Test Time:</span><span class="val" data-slot="testTime"></span></div>
+    <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+    <div class="field"><span class="lbl">Project:</span><span class="val" data-slot="projectId"></span></div>
+  </div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="effLinear19438"></canvas>
+  </div>
+  <p class="figure-caption">Figure B.1 — Overall Efficiency vs. Particle Size</p>
+  <div class="axis-controls-mount" data-axis-controls-for="effLinear19438"></div>
+
+  <div class="chart-wrap figure-wrap">
+    <canvas data-report-chart="effLog19438"></canvas>
+  </div>
+  <p class="figure-caption">Figure B.3 — Overall Efficiency vs. Particle Size (log scale)</p>
+  <div class="axis-controls-mount" data-axis-controls-for="effLog19438"></div>
+</div>

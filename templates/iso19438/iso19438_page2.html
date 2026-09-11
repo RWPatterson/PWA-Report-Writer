@@ -1,0 +1,252 @@
+<!-- =====================================================================================
+     iso19438_page2.html — ISO 19438:2023, "Presentation of Test Results" (the
+     repeatable per-window efficiency pages). Own copy of iso454812_page2.html's
+     REPEATABLE PAGE PROTOTYPE mechanism (inert <template> + anchor, cloned once per
+     group of clumps by reportView.js's fillTable19438Pages) — not shared, per
+     CLAUDE.md, and genuinely different presentation (see that function's own
+     comment): decimal-minute elapsed time, an "Initial" label on the very first
+     clump, UPSTREAM/DOWNSTREAM/EFFICIENCY row labels matching the user's outline.
+
+     Same "fully static shape, fill-only" redesign as Table B.2 and ISO16889 Page 2
+     (see those files' own header comments for the full rationale): all 5
+     CLUMPS_PER_PAGE_19438 clump slots and all 16 possible size columns per block-
+     pair are already real cells here, before any JS runs. fillTable19438Pages only
+     ever sets .textContent on a cell that exists and toggles rpt-slot-hidden
+     (app.css) on a whole clump-slot tbody (fewer than 5 real clumps left, on the
+     last generated page) or a .w19438-size-col cell (fewer than 16 sizes selected)
+     — never creates/removes a row or cell.
+
+     <template> content is inert — see iso454812_page2.html's own note on why this
+     matters for fillSlots' container-wide querySelectorAll. -->
+<template id="w19438PageTemplate">
+  <div class="report-page w19438-page">
+    <h1>ISO 19438:2023 — Presentation of Test Results</h1>
+    <div class="field-row">
+      <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate"></span></div>
+      <div class="field"><span class="lbl">Test Location:</span><span class="val" data-slot="testLocation"></span></div>
+      <div class="field"><span class="lbl">Test ID:</span><span class="val" data-slot="testId"></span></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><span class="lbl">Test Time:</span><span class="val" data-slot="testTime"></span></div>
+      <div class="field"><span class="lbl">Operator:</span><span class="val" data-slot="operator"></span></div>
+      <div class="field"><span class="lbl">Project:</span><span class="val" data-slot="projectId"></span></div>
+    </div>
+    <table class="datatbl w19438-table">
+      <tbody class="w19438-clump" data-clump-slot="1">
+        <tr class="w19438-meta"><td colspan="9">
+          <div class="b2-meta-row">
+            <span class="b2-meta-left" data-field="label"></span>
+            <span class="b2-meta-center">Elapsed time (h:mm:ss): <span data-field="time"></span></span>
+            <span class="b2-meta-right">Diff. pressure (<span data-field="dpUnit"></span>): <span data-field="dp"></span></span>
+          </div>
+        </td></tr>
+        <tr data-block="1" data-field="size" class="b2-size-row"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="size" class="b2-size-row b2-block2"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr class="b2-spacer"><td colspan="9"></td></tr>
+      </tbody>
+
+      <tbody class="w19438-clump" data-clump-slot="2">
+        <tr class="w19438-meta"><td colspan="9">
+          <div class="b2-meta-row">
+            <span class="b2-meta-left" data-field="label"></span>
+            <span class="b2-meta-center">Elapsed time (h:mm:ss): <span data-field="time"></span></span>
+            <span class="b2-meta-right">Diff. pressure (<span data-field="dpUnit"></span>): <span data-field="dp"></span></span>
+          </div>
+        </td></tr>
+        <tr data-block="1" data-field="size" class="b2-size-row"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="size" class="b2-size-row b2-block2"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr class="b2-spacer"><td colspan="9"></td></tr>
+      </tbody>
+
+      <tbody class="w19438-clump" data-clump-slot="3">
+        <tr class="w19438-meta"><td colspan="9">
+          <div class="b2-meta-row">
+            <span class="b2-meta-left" data-field="label"></span>
+            <span class="b2-meta-center">Elapsed time (h:mm:ss): <span data-field="time"></span></span>
+            <span class="b2-meta-right">Diff. pressure (<span data-field="dpUnit"></span>): <span data-field="dp"></span></span>
+          </div>
+        </td></tr>
+        <tr data-block="1" data-field="size" class="b2-size-row"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="size" class="b2-size-row b2-block2"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr class="b2-spacer"><td colspan="9"></td></tr>
+      </tbody>
+
+      <tbody class="w19438-clump" data-clump-slot="4">
+        <tr class="w19438-meta"><td colspan="9">
+          <div class="b2-meta-row">
+            <span class="b2-meta-left" data-field="label"></span>
+            <span class="b2-meta-center">Elapsed time (h:mm:ss): <span data-field="time"></span></span>
+            <span class="b2-meta-right">Diff. pressure (<span data-field="dpUnit"></span>): <span data-field="dp"></span></span>
+          </div>
+        </td></tr>
+        <tr data-block="1" data-field="size" class="b2-size-row"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="size" class="b2-size-row b2-block2"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr class="b2-spacer"><td colspan="9"></td></tr>
+      </tbody>
+
+      <tbody class="w19438-clump" data-clump-slot="5">
+        <tr class="w19438-meta"><td colspan="9">
+          <div class="b2-meta-row">
+            <span class="b2-meta-left" data-field="label"></span>
+            <span class="b2-meta-center">Elapsed time (h:mm:ss): <span data-field="time"></span></span>
+            <span class="b2-meta-right">Diff. pressure (<span data-field="dpUnit"></span>): <span data-field="dp"></span></span>
+          </div>
+        </td></tr>
+        <tr data-block="1" data-field="size" class="b2-size-row"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="1" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="size" class="b2-size-row b2-block2"><th>Particle Size</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="upstream"><th>UPSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="downstream"><th>DOWNSTREAM</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr data-block="2" data-field="efficiency"><th>EFFICIENCY %</th>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+          <td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td><td class="w19438-size-col"></td>
+        </tr>
+        <tr class="b2-spacer"><td colspan="9"></td></tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+<div id="w19438PagesAnchor" hidden></div>
