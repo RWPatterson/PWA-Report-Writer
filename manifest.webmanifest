@@ -1,0 +1,13 @@
+{
+  "name": "WebReportWriter",
+  "short_name": "WebReportWriter",
+  "description": "Parses test stand .DAT files and generates filtration test report data (ISO 16889, ISO 4548-12, and more to come), entirely offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#2f5d8a",
+  "icons": [
+    { "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

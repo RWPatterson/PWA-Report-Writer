@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebReportWriter</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#2f5d8a">
+<link rel="stylesheet" href="./css/app.css">
+<!-- Paper size (Letter/US vs A4/EU) is written here at print time by app.js — @page
+     doesn't support conditional selectors, so the chosen size can't live in app.css
+     directly (see the note there). Empty by default; app.js fills it in on load. -->
+<style id="paperSizeStyle"></style>
+<!-- Print footer's date half: app.js writes an @page { @bottom-left { content: "Printed:
+     <today>" } } rule here, since CSS can't compute the current date. The page-number
+     half lives statically in app.css's @page. -->
+<style id="printFooterStyle"></style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- F-layout: sidebar holds navigation + controls that apply regardless of mode
+       (load a file, switch mode, units). Everything mode-specific lives in that
+       mode's own .context-toolbar in the content area instead — see app.js's
+       showView(), which toggles which one is .active the same way it already
+       toggles which .view is .active. -->
+  <nav class="sidebar">
+    <div class="sidebar-group">
+      <button id="loadDataBtn" class="primary">Load data file</button>
+      <input type="file" id="fileInput" accept=".dat,.DAT,.sav,.SAV,.txt,.csv" style="display:none">
+      <span class="status" id="statusText">No file loaded</span>
+    </div>
+    <div class="sidebar-group view-switch">
+      <button data-view="explorer" class="active">Data File Explorer</button>
+      <button data-view="report">Standard Report</button>
+      <!-- Expands under Report only (app.js's showView toggles .active here the same
+           way it toggles which .context-toolbar/.view is active) — which standard to
+           report is meaningless outside Report mode, so it's not shown as a permanent
+           top-level item. -->
+      <div class="standard-switch" id="standardSwitch">
+        <button data-standard="iso16889" class="active">ISO 16889 (2022)</button>
+        <button data-standard="iso454812">ISO 4548-12 (2017)</button>
+        <button data-standard="iso19438">ISO 19438 (2023)</button>
+        <button data-standard="iso3968">ISO 3968 (2017)</button>
+        <button data-standard="iso23369">ISO 23369 (2022)</button>
+      </div>
+      <button data-view="compare">Compare Files</button>
+      <button data-view="machineProfiles">Machine Profiles</button>
+      <!-- Hidden by default — developer-only, never surfaced to a customer. Revealed
+           by Ctrl+Alt+Shift+Click on #statusText (see app.js), the pattern already
+           used elsewhere for hidden dev buttons; the reveal does NOT persist across
+           a reload (a new instance of the program always starts hidden again — see
+           app.js's own comment). -->
+      <button data-view="audit" id="auditNavBtn" style="display:none">Audit Trail</button>
+      <!-- Audit's OWN switcher (app.js's showView toggles .active the same way as
+           #standardSwitch above) — deliberately separate from #standardSwitch: lists
+           the same 4 real standards (each has its own AuditSteps.js, per
+           auditView.js's registry) plus the Data File Explorer's own raw-parsing
+           checks, which #standardSwitch has no equivalent of. Picking a real standard
+           here also updates the app's current standard everywhere (same effect as
+           #standardSwitch, just reachable without detouring through Report first);
+           picking "Data File Explorer" only changes what the Audit view itself shows
+           — see app.js's auditSelectedId. -->
+      <div class="standard-switch" id="auditSwitch">
+        <button data-audit="iso16889" class="active">ISO 16889 (2022)</button>
+        <button data-audit="iso454812">ISO 4548-12 (2017)</button>
+        <button data-audit="iso19438">ISO 19438 (2023)</button>
+        <button data-audit="iso3968">ISO 3968 (2017)</button>
+        <button data-audit="iso23369">ISO 23369 (2022)</button>
+        <button data-audit="explorer">Data File Explorer</button>
+      </div>
+    </div>
+    <div class="sidebar-group">
+      <label for="unitSelect">Units</label>
+      <select id="unitSelect">
+        <option value="SI">SI</option>
+        <option value="US">Eng</option>
+      </select>
+    </div>
+    <!-- Paper size lives here, not in #context-report, because it now applies
+         regardless of mode: both the single-file Report and Compare Files' custom
+         comparison reports print against it (see app.js's redrawForPrint / this
+         file's own top-of-file rule for why the sidebar is where a cross-mode
+         control belongs). One shared setting — a print shop sets its paper size
+         once, not per document type. -->
+    <div class="sidebar-group">
+      <label for="paperSizeSelect">Paper</label>
+      <select id="paperSizeSelect">
+        <option value="letter">Letter (US)</option>
+        <option value="a4">A4 (EU)</option>
+      </select>
+    </div>
+    <div class="sidebar-group">
+      <button id="helpBtn" title="A short guide to what each tab does and how they fit together">About Me</button>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <div class="toolbar context-toolbar active" id="context-explorer">
+      <div class="group">
+        <button id="saveTabsBtn" title="Save your custom plot tabs so you can reload the same set later, or on a different file">Save chart tabs</button>
+        <button id="loadTabsBtn">Load chart tabs</button>
+        <input type="file" id="loadTabsInput" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
+
+    <div class="toolbar context-toolbar" id="context-report">
+      <div class="group">
+        <button id="saveBtn">Save session (.json)</button>
+        <button id="loadBtn">Load session (.json)</button>
+        <input type="file" id="loadInput" accept=".json,application/json" style="display:none">
+      </div>
+      <!-- Sensor + display-size + gravimetric picking only matter for a standard that
+           has that capability for the loaded file — kept hidden the rest of the time
+           (app.js's updateReportingControlsVisibility) rather than always-visible-
+           but-irrelevant. -->
+      <div class="divider" id="sensorDivider" style="display:none"></div>
+      <div class="group" id="sensorGroup" style="display:none">
+        <label for="sensorSelect">Sensor</label>
+        <select id="sensorSelect"></select>
+      </div>
+      <!-- Pressure view: MidstreamFlag:false dual-filter (Two Pressure/Suction &
+           Pressure) files only — there's no filter-identity sensor toggle to reuse
+           there (LB/LS on those files means measurement technology, not filter
+           identity), so this is its own independent picker. -->
+      <div class="divider" id="pressureViewDivider" style="display:none"></div>
+      <div class="group" id="pressureViewGroup" style="display:none">
+        <label for="pressureViewSelect">Pressure view</label>
+        <select id="pressureViewSelect"></select>
+      </div>
+      <div class="group" id="displaySizesGroup" style="display:none">
+        <button id="displaySizesBtn" title="Choose which measured particle sizes fill the report's efficiency table and Table B.2">Select display sizes</button>
+      </div>
+      <div class="group" id="gravimetricGroup" style="display:none">
+        <button id="gravimetricBtn" title="Enter post-test gravimetric results (a lab result the .DAT file can't supply)">Add/Edit Gravimetrics</button>
+      </div>
+      <div class="group" id="addCountDetailsGroup" style="display:none">
+        <label title="Adds a page with Upstream/Downstream Particle Counts vs. Time charts to the end of the report"><input type="checkbox" id="addCountDetailsCheck"> Add Count Details</label>
+      </div>
+      <!-- ISO 3968 only — the optional tare (empty-housing) file. A prompt already
+           asks once right after a P-Q file loads (app.js's maybePromptForTareFile);
+           this button is for adding one later after declining, or swapping in a
+           different tare, without re-triggering that yes/no prompt. -->
+      <div class="group" id="tareGroup" style="display:none">
+        <button id="tareBtn" title="Add or change the tare (empty-housing) reference file">Add Tare File</button>
+        <input type="file" id="tareFileInput" accept=".dat,.DAT,.sav,.SAV,.txt,.csv" style="display:none">
+      </div>
+      <!-- ISO 23369 only — the cyclic flow test's "-Cyclic.DAT" companion file. A
+           prompt already asks for it right after a cyclic file loads (app.js's
+           maybePromptForCompanionFile); this button is for adding one later after
+           skipping, or swapping in a different companion file, without re-triggering
+           that prompt. warn-btn styling toggles on (app.js) while none is loaded —
+           unlike the tare file, this one is load-bearing for full-resolution results. -->
+      <div class="group" id="companionGroup" style="display:none">
+        <button id="companionBtn" title="Add or change the cyclic companion (-Cyclic.DAT) file">Add Companion File</button>
+        <input type="file" id="companionFileInput" accept=".dat,.DAT,.sav,.SAV,.txt,.csv" style="display:none">
+      </div>
+      <!-- Company letterhead — global (not per-standard, not per-file), so it's here
+           rather than in a per-standard group: always visible on the Report toolbar,
+           unlike tareGroup/companionGroup which only show for the standard that uses
+           them. Same button+hidden-input pattern as those. "Remove logo" only shown
+           once one is actually stored (see app.js's updateCompanyLogoButtonState). -->
+      <div class="group">
+        <button id="companyLogoBtn" title="Upload a company logo (PNG or JPEG) to print in the top-right corner of every report page">Add Company Logo</button>
+        <button id="removeCompanyLogoBtn" style="display:none" title="Remove the company logo from every report page">Remove logo</button>
+        <input type="file" id="companyLogoFileInput" accept="image/png,image/jpeg" style="display:none">
+      </div>
+      <div class="divider"></div>
+      <!-- Hidden by default (app.js's updateReportingControlsVisibility) — shown
+           only once there's an analysis error, analysis warning, or control-target
+           failure to report; its label carries the live issue count. -->
+      <button id="warningsBtn" class="warn-btn" style="display:none" title="See every analysis error, warning, and control-target failure in full detail"></button>
+      <div class="divider"></div>
+      <button id="printBtn">Print report</button>
+      <!-- Shown only while no file is loaded (app.js's updateReportEmptyStateBanner,
+           called from updateReportingControlsVisibility) — text filled in dynamically
+           with the CURRENTLY selected standard's own label. Lives here, in the
+           toolbar, rather than inside #view-report itself: renderReportPages fully
+           replaces #view-report's innerHTML on every re-render (standard switch,
+           sensor switch, ...), which would wipe anything prepended there; this
+           element is never touched by that call. -->
+      <div id="reportEmptyStateHint" class="hint-box hint-full" style="display:none"></div>
+      <p class="hint hint-full">
+        Double-click a highlighted-when-overridden field on the report to enter or clear a manual value
+        (Element ID, Housing ID, and similar physical specs aren't in the .DAT file and need this).
+        With no file loaded, edits are saved as custom defaults that persist across sessions and
+        pre-fill future reports; with a file loaded, edits apply to that file only.
+      </p>
+    </div>
+
+    <div class="toolbar context-toolbar" id="context-compare">
+      <div class="group">
+        <button id="saveCompareTemplatesBtn" title="Save your custom comparison report templates so you can reload the same page/plot layout later, against a different set of files">Save comparison templates</button>
+        <button id="loadCompareTemplatesBtn">Load comparison templates</button>
+        <input type="file" id="loadCompareTemplatesInput" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="divider"></div>
+      <button id="printCompareBtn">Print comparison report</button>
+    </div>
+
+    <!-- Save/load the whole per-rig directory as one JSON file — for distributing a
+         shared set of machine profiles to multiple terminals in an organization (per
+         the user, 2026-08-21). Loading MERGES into whatever's already saved locally
+         on this terminal (imported entries win on a serial-number collision, any
+         local-only profiles are left untouched) — never a full replace, unlike this
+         app's own chart-tabs/comparison-templates load buttons, since wiping out a
+         terminal's own local-only profiles on every import would be actively
+         destructive for this feature's actual use case. -->
+    <div class="toolbar context-toolbar" id="context-machineProfiles">
+      <div class="group">
+        <button id="saveMachineProfilesBtn" title="Save every machine profile on this terminal as one file, to share with other terminals">Save machine profiles (.json)</button>
+        <button id="loadMachineProfilesBtn" title="Merge a shared machine-profiles file into this terminal's own directory (imported entries win on a serial-number conflict)">Load machine profiles (.json)</button>
+        <input type="file" id="loadMachineProfilesInput" accept=".json,application/json" style="display:none">
+      </div>
+    </div>
+
+    <!-- Hidden route — see #auditNavBtn's own comment above. No file-load controls
+         of its own; the audit trail only ever displays whatever's already loaded
+         via the normal Explorer/Report flow. Print is its only real control. -->
+    <div class="toolbar context-toolbar" id="context-audit">
+      <button id="printAuditBtn">Print audit trail</button>
+    </div>
+
+    <div class="view active" id="view-explorer"></div>
+    <div class="view" id="view-report"></div>
+    <div class="view" id="view-compare"></div>
+    <div class="view" id="view-machineProfiles"></div>
+    <div class="view" id="view-audit"></div>
+
+  </main>
+
+</div>
+
+<!-- Parser and analysis engines: plain scripts, loaded before the module entry point
+     so DataFile / Iso16889Analysis / Iso454812Analysis / Iso19438Analysis are
+     available as globals to app.js. analysisMath.js (window.AnalysisMath) and
+     coincidenceLimitCheck.js (window.CoincidenceLimitCheck) are shared helpers and
+     must load before the analysis engines that use them. Each standard's
+     termination logic is inlined into its own analysis engine now (no shared
+     testTermination.js). -->
+<script src="./src/helpers/analysisMath.js"></script>
+<script src="./src/helpers/coincidenceLimitCheck.js"></script>
+<script src="./src/core/dataFile.js"></script>
+<script src="./src/core/cyclicCompanionFile.js"></script>
+<script src="./src/standards/iso16889/iso16889Analysis.js"></script>
+<script src="./src/standards/iso454812/iso454812Analysis.js"></script>
+<script src="./src/standards/iso19438/iso19438Analysis.js"></script>
+<script src="./src/standards/iso3968/iso3968Analysis.js"></script>
+<script src="./src/standards/iso23369/iso23369Analysis.js"></script>
+<!-- Chart.js: CDN for development convenience only. The offline single-file bundle
+     must vendor this file's actual source instead — see the note in chartView.js. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
