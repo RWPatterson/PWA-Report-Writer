@@ -21,17 +21,20 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
    flexible content area (mode-specific controls + that mode's view) — see index.html's
    structural comment and app.js's showView().
 
-   .wrap is a FIXED-HEIGHT shell (100vh), not a normally-scrolling page — sidebar and
-   context toolbar are simply never in a scrolling ancestor at all, so there's nothing
-   for them to need position:sticky FOR. Only .view (below) scrolls, internally, via
-   its own overflow-y:auto. This replaced an earlier position:sticky attempt: sticky
-   elements inside this flex/padding shell had a real, reproducible bug — scrolled
-   report content became visible ABOVE the sticky header, in the gap between the
-   browser's own chrome and wherever the header had stuck — that a z-index/stacking-
-   context fix (isolation:isolate) did NOT resolve, meaning the cause wasn't (only)
-   stacking order. Fixed-height shell + internal scroll pane is the standard, more
-   robust pattern for "pinned chrome + scrolling content" — it sidesteps the whole
-   class of sticky-inside-flexbox edge cases rather than chasing this one further. */
+   .wrap is a FIXED-HEIGHT shell (100vh), not a normally-scrolling page — the
+   sidebar is simply never in a scrolling ancestor at all, so there's nothing for
+   it to need position:sticky FOR; it's always visible on its own. .content (below)
+   scrolls internally as ONE unit (context toolbar + view together, per the user,
+   2026-09-17 — nothing left in a context-toolbar needs to stay pinned above the
+   report once it scrolls, now that Report Options/Print/Save/etc. all live in the
+   always-visible sidebar instead). Do not reach for position:sticky here even for
+   a future "pin this one thing" need: a real sticky attempt in this exact
+   flex/padding shell had a reproducible bug — scrolled report content became
+   visible ABOVE the sticky header, in the gap between the browser's own chrome
+   and wherever the header had stuck — that a z-index/stacking-context fix
+   (isolation:isolate) did NOT resolve, meaning the cause wasn't (only) stacking
+   order. Fixed-height shell + internal scroll pane sidesteps that whole class of
+   sticky-inside-flexbox edge cases rather than chasing it further. */
 .wrap {
   max-width: 1300px; margin: 0 auto; padding: 20px; height: 100vh; overflow: hidden;
   display: flex; gap: 20px; align-items: flex-start;
@@ -58,24 +61,39 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
   border: 1px solid var(--ink); background: var(--card); color: var(--ink);
 }
 .sidebar-group .status { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+/* One shared look for EVERY sidebar button (per the user, 2026-09-17 — was
+   previously a mix: File/Actions/About used a bordered white box that inverted
+   to solid black on hover, while Mode/Configuration's nested buttons already
+   used this borderless/accent-on-hover style; the mix read as two different
+   widget kinds in the same nav). No border anywhere, transparent at rest, a
+   light accent wash on hover/focus so it still reads as clearly interactive.
+   .active (an expanded disclosure's own toggle button, or the current mode)
+   and .primary (the one true call-to-action, Load File) both use the SAME solid
+   accent-background treatment, just permanently instead of hover-only — neither
+   reintroduces a border, keeping the whole sidebar one consistent language. */
 .sidebar-group button {
-  font-family: var(--sans); font-size: 12.5px; padding: 8px 10px; border-radius: 4px;
-  border: 1px solid var(--ink); background: var(--card); color: var(--ink); cursor: pointer;
+  font-family: var(--sans); font-size: 12.5px; padding: 9px 10px; border-radius: 4px;
+  border: none; background: transparent; color: var(--ink-soft); text-align: left; cursor: pointer;
 }
-.sidebar-group button:hover { background: var(--ink); color: var(--paper); }
-.sidebar-group button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.sidebar-group button.primary:hover { background: #244a6f; }
+.sidebar-group button:hover { background: var(--accent-soft); color: var(--accent); }
+.sidebar-group button.active,
+.sidebar-group button.primary { background: var(--accent); color: #fff; font-weight: 600; }
+.sidebar-group button.primary:hover { background: #244a6f; color: #fff; }
+/* Load a file first, standard-compatibility mismatch, etc. — grayed rather than
+   hidden, same "still there, just explain why it can't be used yet" idea as
+   .standard-switch button:disabled below. */
+.sidebar-group button:disabled,
+.sidebar-group button:disabled:hover {
+  opacity: 0.45; cursor: not-allowed; background: transparent; color: var(--ink-soft);
+}
 
 /* Mode switch — a vertical nav list here (was a horizontal tab row above the content
    before the F-layout), same .view-switch class/button structure app.js already
-   selects by, only the visual treatment changes. */
+   selects by. Button look itself now comes from the shared .sidebar-group button
+   rule above (font-size bumped to 13px here only, one size up from the rest of
+   the sidebar — these are the top-level navigation entries). */
 .sidebar-group.view-switch { padding: 6px; gap: 2px; }
-.sidebar-group.view-switch button {
-  border: none; border-radius: 4px; background: transparent; color: var(--ink-soft);
-  text-align: left; padding: 9px 10px; font-size: 13px; font-family: var(--sans); cursor: pointer;
-}
-.sidebar-group.view-switch button:hover { background: var(--accent-soft); color: var(--accent); }
-.sidebar-group.view-switch button.active { background: var(--accent); color: #fff; font-weight: 600; }
+.sidebar-group.view-switch button { font-size: 13px; }
 
 /* Standard sub-menu look — shared by TWO separate elements, each independently
    toggled by app.js's showView: #standardSwitch (expands under "Report", the 4 real
@@ -103,11 +121,19 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 }
 
 /* ---- Content area: per-mode context toolbar + that mode's view ----
-   A flex COLUMN filling .wrap's full height: the active .context-toolbar keeps its
-   natural size (flex-shrink:0) at the top, and .view.active fills whatever's left
-   and scrolls internally (see .view below) — the actual fix for the report-scrolls-
-   above-the-header bug (see .wrap's note above). */
-.content { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+   A flex COLUMN filling .wrap's full height, scrolling as ONE unit (overflow-y
+   here, not on .view below) — the context toolbar's residual content (warnings
+   button, empty-state hint) is no longer pinned above the report while it
+   scrolls, now that Report Options/Print/Save and everything else that used to
+   need pinning has moved to the always-visible sidebar (per the user, 2026-09-17:
+   nothing left in a context-toolbar is important enough to keep fixed once the
+   report itself scrolls past it). Earlier this WAS split — .context-toolbar fixed
+   at the top, only .view scrolling internally below it — see git history/
+   CHANGELOG if that behavior is ever needed again; don't reach for
+   position:sticky to get there, a real sticky attempt in this exact shell had a
+   reproducible bug (scrolled content appearing ABOVE the sticky header) that
+   isolation:isolate did not fix. */
+.content { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; overflow-y: auto; }
 
 /* Narrow viewport: stack the sidebar above the content instead of beside it, and fall
    back to the page itself scrolling normally (this fixed-height/internal-scroll shell
@@ -154,12 +180,12 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 .hint-full { flex-basis: 100%; margin-top: 4px; }
 
 .view { display: none; }
-/* The actual scrolling pane: fills whatever height .content has left below the
-   context toolbar, and scrolls internally — this (not position:sticky on the header)
-   is what keeps the sidebar/context-toolbar always visible while a long report
-   scrolls. padding-bottom replaces .wrap's old bottom padding, now that .wrap itself
-   doesn't scroll or have breathing room of its own below the fold. */
-.view.active { display: block; flex: 1; overflow-y: auto; padding-bottom: 40px; }
+/* flex-shrink:0 (not flex:1/overflow-y:auto — see .content above) — renders at its
+   own natural content height; .content is what scrolls now, toolbar and view
+   together as one normal flow. padding-bottom replaces .wrap's old bottom padding,
+   now that .wrap itself doesn't scroll or have breathing room of its own below
+   the fold. */
+.view.active { display: block; flex-shrink: 0; padding-bottom: 40px; }
 
 /* .hint: general small-muted-text utility, used standalone in modals too (e.g.
    iso454812DisplaySizesView.js). */
@@ -241,6 +267,16 @@ h3 ~ table.datatbl { margin-left: 20px; width: calc(100% - 20px); }
    to a report field whose control-target rule failed — see warningsDialogView.js for
    the full-detail counterpart these markers point back to. */
 .field-warn { color: var(--warn-ink); cursor: help; margin-left: 2px; }
+/* .field-edit-btn: reportView.js's applyFieldEditButtons' pencil, inline (unlike
+   chartAxisControls.js's absolutely-positioned "Edit chart axes" button this glyph
+   idiom is borrowed from) so it sits in the .field flex row right after the value. */
+.field-edit-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; padding: 0; margin-left: 2px;
+  font-size: 11px; line-height: 1; border: none; background: none;
+  color: var(--ink-soft); cursor: pointer; border-radius: 2px;
+}
+.field-edit-btn:hover { color: var(--accent); background: var(--accent-soft); }
 /* .field-info: static ⓘ hint next to a report field — same inline/title-tooltip
    shape as .field-warn just above (native title attribute, no JS/framework), just
    neutral-colored and written directly in a template rather than JS-inserted, since
@@ -683,6 +719,10 @@ table.eff-table thead td.betarow { font-weight: 600; }
    list, same generic-table rationale as Audit's own reuse just below. Input styling
    otherwise only exists scoped to .modal-box (dialogs); .mp-form isn't a dialog (it's
    inline in a persistent tab), so it gets its own copy of that same input look. ---- */
+/* Same overflow-x:auto wrapper idea as .audit-table-wrap/.w16889-p2-scroll — a
+   full Counter/Sensor/LS/LBE summary plus Cal Method/Date can make this table
+   wider than the content column; scroll horizontally rather than clip. */
+.mp-table-wrap { overflow-x: auto; margin: 6px 0; }
 .mp-list td.mp-actions { white-space: nowrap; text-align: right; }
 .mp-list td.mp-actions button { margin-left: 6px; }
 .mp-form {
@@ -847,7 +887,7 @@ table.eff-table thead td.betarow { font-weight: 600; }
      nothing to print if it's showing, so hiding it just leaves a blank page rather
      than printing instructions meant for the screen. */
   .compare-shelf, .compare-template-bar, .dim-summary, .compare-picker, #view-compare .hint-box { display: none !important; }
-  .compare-page-tools, .edit-chart-btn, .axis-controls, .compare-plot-title .chip-remove { display: none !important; }
+  .compare-page-tools, .edit-chart-btn, .axis-controls, .compare-plot-title .chip-remove, .field-edit-btn { display: none !important; }
   .compare-report-page { border: none; padding: 0; margin-bottom: 0; page-break-after: always; }
   .compare-report-page:last-child { page-break-after: auto; }
   .compare-plot-box { border: none; page-break-inside: avoid; }
@@ -959,7 +999,7 @@ table.eff-table thead td.betarow { font-weight: 600; }
      fully rule out. */
   .comments-box { min-height: 0; padding: 1px 4px; margin-top: 1px; font-size: 9.5px; }
   .hint, .footer-note { display: none; }
-  .axis-controls, .axis-controls-mount, .edit-chart-btn { display: none !important; }
+  .axis-controls, .axis-controls-mount, .edit-chart-btn, .field-edit-btn { display: none !important; }
 
   /* ISO 16889 Page 1 gets its own, slightly larger print sizing — the generic
      .report-page rule just above was hard-won against a DIFFERENT, denser page (4
