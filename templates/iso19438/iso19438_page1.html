@@ -13,7 +13,30 @@
      The Filtration Efficiencies table (#effTable, further down) has empty
      <thead>/<tbody> — filled entirely by iso19438Mapper.js via reportView.js's
      generic data-slot filling, same as iso454812's #effTable equivalent, because the
-     particle sizes shown vary per file. ===================================== -->
+     particle sizes shown vary per file.
+
+     data-editable audit (2026-09-17, per the user): a field keeps data-editable ONLY
+     if it's genuinely descriptive/administrative (no .DAT equivalent, or the mapper's
+     own read is a dead/never-present header key — testLocation), the mapper itself
+     documents a deliberate "estimate now, real reading overrides it later" design
+     (testVolumeFinal — see iso19438Mapper.js's own comment), is a free-text
+     annotation field (comments — locking it would defeat its purpose even though the
+     mapper does read a Comments header key), is a hardcoded literal with no real
+     per-file data behind it at all (countingMethod — always "Online" today, see the
+     mapper's own comment), or is one of the two true gravimetric lab results
+     (injectionGravInitial/Final, finalGravimetricGf — pencil re-routes to the Add/Edit
+     Gravimetrics dialog, see app.js). Administrative identity fields (Test Date, Test
+     ID, Test Time, Operator, Project) stay editable too — correcting a misrecorded
+     name/ID/date isn't the same risk as overriding a measured quantity. Everything
+     else the mapper reads straight from the .DAT file's own headers/channels, or
+     calculates from values that are, lost data-editable. dilutionSensorType is LOCKED
+     despite having no header of its own, because it IS a live per-file derived value
+     (which sensor — LB vs LS — the analysis actually selected), not a constant.
+     nonRetainedMassMnr/retainedCapacityCr specifically are CALCULATED from a mix of
+     data-derived analysis values and the two true gravimetric inputs above, so per
+     the user: push a correction through THOSE inputs (which auto-recompute these via
+     recomputeIso19438GravimetricDerived), not a direct override here — same reasoning
+     for injectionGravAverage. ===================================== -->
 <div class="report-page">
   <!-- Static text below is the NORMAL-case title, shown before a file is loaded
        (and whenever the file turns out to be a normal Multipass test) — see
@@ -45,7 +68,7 @@
     <div class="field"><span class="lbl">Filter Analyzed:</span><span class="val" data-slot="analyzedFilterLabel"></span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Housing Type:</span><span class="val" data-slot="housingType" data-editable></span></div>
+    <div class="field"><span class="lbl">Housing Type:</span><span class="val" data-slot="housingType"></span></div>
     <div class="field"><span class="lbl">Date Const.:</span><span class="val" data-slot="dateConst" data-editable></span></div>
     <div class="field"></div>
   </div>
@@ -53,12 +76,12 @@
   <h2>Operating Conditions</h2>
   <h3>Test Fluid</h3>
   <div class="field-row">
-    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="fluidType" data-editable></span></div>
-    <div class="field"><span class="lbl">Viscosity:</span><span class="val" data-slot="viscosity" data-editable></span><span class="unit">mm&sup2;/s</span></div>
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="fluidType"></span></div>
+    <div class="field"><span class="lbl">Viscosity:</span><span class="val" data-slot="viscosity"></span><span class="unit">mm&sup2;/s</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Initial Conductivity:</span><span class="val" data-slot="initialConductivity" data-editable></span><span class="unit">pS/m</span></div>
-    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature" data-editable></span><span class="unit">&deg;C</span></div>
+    <div class="field"><span class="lbl">Initial Conductivity:</span><span class="val" data-slot="initialConductivity"></span><span class="unit">pS/m</span></div>
+    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature"></span><span class="unit">&deg;C</span></div>
   </div>
   <div class="field-row">
     <div class="field"><span class="lbl">Final Conductivity:</span><span class="val" data-slot="finalConductivity" data-editable></span><span class="unit">pS/m</span></div>
@@ -67,30 +90,30 @@
 
   <h3>Test Dust</h3>
   <div class="field-row">
-    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="dustType" data-editable></span></div>
-    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="dustBatch" data-editable></span></div>
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="dustType"></span></div>
+    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="dustBatch"></span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Dust added W:</span><span class="val" data-slot="dustAddedW" data-editable></span><span class="unit">g</span></div>
+    <div class="field"><span class="lbl">Dust added W:</span><span class="val" data-slot="dustAddedW"></span><span class="unit">g</span></div>
     <div class="field"><span class="lbl">Injection grav. initial:</span><span class="val" data-slot="injectionGravInitial" data-editable></span><span class="unit">mg/L</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Volume V<sub>i</sub>:</span><span class="val" data-slot="volumeVi" data-editable></span><span class="unit">L</span></div>
+    <div class="field"><span class="lbl">Volume V<sub>i</sub>:</span><span class="val" data-slot="volumeVi"></span><span class="unit">L</span></div>
     <div class="field"><span class="lbl">Injection grav. final:</span><span class="val" data-slot="injectionGravFinal" data-editable></span><span class="unit">mg/L</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Injection Flowrate Q<sub>ia</sub>:</span><span class="val" data-slot="injectionFlowrateQia" data-editable></span><span class="unit">mL/min</span></div>
-    <div class="field"><span class="lbl">Injection grav. Average G<sub>ia</sub>:</span><span class="val" data-slot="injectionGravAverage" data-editable></span><span class="unit">mg/L</span></div>
+    <div class="field"><span class="lbl">Injection Flowrate Q<sub>ia</sub>:</span><span class="val" data-slot="injectionFlowrateQia"></span><span class="unit">mL/min</span></div>
+    <div class="field"><span class="lbl">Injection grav. Average G<sub>ia</sub>:</span><span class="val" data-slot="injectionGravAverage"></span><span class="unit">mg/L</span></div>
   </div>
 
   <h3>Test System</h3>
   <div class="field-row">
-    <div class="field"><span class="lbl">Flowrate Q:</span><span class="val" data-slot="testFlowrateQ" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"><span class="lbl">Flowrate Q:</span><span class="val" data-slot="testFlowrateQ"></span><span class="unit">L/min</span></div>
     <div class="field"><span class="lbl">Initial Cleanliness:</span><span class="val" data-slot="initialCleanliness" data-editable></span><span class="unit">#&gt;10&micro;m/mL</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Volume:</span><span class="val" data-slot="testVolume" data-editable></span><span class="unit">L</span></div>
-    <div class="field"><span class="lbl">Base Gravimetric level G<sub>a</sub>:</span><span class="val" data-slot="baseGravimetricGa" data-editable></span><span class="unit">mg/L</span></div>
+    <div class="field"><span class="lbl">Volume:</span><span class="val" data-slot="testVolume"></span><span class="unit">L</span></div>
+    <div class="field"><span class="lbl">Base Gravimetric level G<sub>a</sub>:</span><span class="val" data-slot="baseGravimetricGa"></span><span class="unit">mg/L</span></div>
   </div>
   <div class="field-row">
     <div class="field"><span class="lbl">Final Volume V<sub>f</sub>:</span><span class="val" data-slot="testVolumeFinal" data-editable></span><span class="unit">L</span></div>
@@ -99,24 +122,24 @@
 
   <h3>Dilution System</h3>
   <div class="field-row">
-    <div class="field"><span class="lbl">Sensor Type:</span><span class="val" data-slot="dilutionSensorType" data-editable></span></div>
-    <div class="field"><span class="lbl">Sample time:</span><span class="val" data-slot="sampleTimeS" data-editable></span><span class="unit">s</span></div>
+    <div class="field"><span class="lbl">Sensor Type:</span><span class="val" data-slot="dilutionSensorType"></span></div>
+    <div class="field"><span class="lbl">Sample time:</span><span class="val" data-slot="sampleTimeS"></span><span class="unit">s</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Sensor Flow Rate:</span><span class="val" data-slot="sensorFlowRate" data-editable></span><span class="unit">mL/min</span></div>
-    <div class="field"><span class="lbl">Hold time:</span><span class="val" data-slot="holdTimeS" data-editable></span><span class="unit">s</span></div>
+    <div class="field"><span class="lbl">Sensor Flow Rate:</span><span class="val" data-slot="sensorFlowRate"></span><span class="unit">mL/min</span></div>
+    <div class="field"><span class="lbl">Hold time:</span><span class="val" data-slot="holdTimeS"></span><span class="unit">s</span></div>
   </div>
   <div class="field-row">
     <div class="field"><span class="lbl">Counting method:</span><span class="val" data-slot="countingMethod" data-editable></span></div>
-    <div class="field"><span class="lbl">Sampling time:</span><span class="val" data-slot="samplingTimeMin" data-editable></span><span class="unit">min</span></div>
+    <div class="field"><span class="lbl">Sampling time:</span><span class="val" data-slot="samplingTimeMin"></span><span class="unit">min</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Upstream dilution ratio:</span><span class="val" data-slot="upstreamDilutionRatio" data-editable></span></div>
-    <div class="field"><span class="lbl">Number of records to average:</span><span class="val" data-slot="countsToAverage" data-editable></span></div>
+    <div class="field"><span class="lbl">Upstream dilution ratio:</span><span class="val" data-slot="upstreamDilutionRatio"></span></div>
+    <div class="field"><span class="lbl">Number of records to average:</span><span class="val" data-slot="countsToAverage"></span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Downstream dilution ratio:</span><span class="val" data-slot="downstreamDilutionRatio" data-editable></span></div>
-    <div class="field"><span class="lbl">Total records read:</span><span class="val" data-slot="totalCounts" data-editable></span></div>
+    <div class="field"><span class="lbl">Downstream dilution ratio:</span><span class="val" data-slot="downstreamDilutionRatio"></span></div>
+    <div class="field"><span class="lbl">Total records read:</span><span class="val" data-slot="totalCounts"></span></div>
   </div>
 
   <h2>Test Results</h2>
@@ -275,7 +298,7 @@
         <td class="betarow">99</td>
       </tr>
       <tr>
-        <td><span class="lbl">Non-retained mass M<sub>nr</sub>:</span><span class="val" data-slot="nonRetainedMassMnr" data-editable></span><span class="unit">g</span></td>
+        <td><span class="lbl">Non-retained mass M<sub>nr</sub>:</span><span class="val" data-slot="nonRetainedMassMnr"></span><span class="unit">g</span></td>
         <th>Initial filter rating &micro;mC</th>
         <td class="betarow" data-slot="ratingInitial50"></td>
         <td class="betarow" data-slot="ratingInitial90"></td>
@@ -283,7 +306,7 @@
         <td class="betarow" data-slot="ratingInitial99"></td>
       </tr>
       <tr>
-        <td><span class="lbl">Retained capacity C<sub>r</sub>:</span><span class="val" data-slot="retainedCapacityCr" data-editable></span><span class="unit">g</span></td>
+        <td><span class="lbl">Retained capacity C<sub>r</sub>:</span><span class="val" data-slot="retainedCapacityCr"></span><span class="unit">g</span></td>
         <th>Overall filter rating &micro;mC</th>
         <td class="betarow" data-slot="ratingOverall50"></td>
         <td class="betarow" data-slot="ratingOverall90"></td>

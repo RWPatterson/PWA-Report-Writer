@@ -8,6 +8,20 @@
 
      Units printed via a trailing <span class="unit"> after the value, not in the
      label — same convention as every other clean standard's Page 1.
+
+     data-editable audit (2026-09-17, per the user): a field keeps data-editable ONLY
+     if it's genuinely descriptive/administrative (no .DAT equivalent), or the mapper
+     itself documents a deliberate "estimate now, real reading overrides it later"
+     design (testVolumeFinal, injSystemVolumeInitial/Final, baseUpstreamGravLevel —
+     see iso23369Mapper.js's own comments, same reasoning as iso16889Mapper.js's), or
+     is one of the three true gravimetric lab results (injectionGravInitial/Final,
+     finalGravimetricGf — pencil re-routes to the Add/Edit Gravimetrics dialog, see
+     app.js). Everything else the mapper reads straight from the .DAT file's own
+     headers/channels, or calculates from values that are, lost data-editable —
+     overriding it would misrepresent what the rig actually measured.
+     injectionGravAverage specifically is CALCULATED from the two true gravimetric
+     inputs above, so per the user: push a correction through THOSE fields (which
+     auto-recompute this one), not a direct override here.
      ===================================================================================== -->
 <div class="report-page w23369-page1">
   <!-- Static text below is the NORMAL-case title, shown before a file is loaded —
@@ -16,6 +30,10 @@
        string or the "Non-Standard ... Test Reported to ISO 23369" variant. -->
   <h1 data-slot="reportTitle">ISO 23369:2022 — Multi-Pass Test Under Cyclic Flow Conditions Report</h1>
 
+  <!-- Test Laboratory/Test Date/Operator are administrative identity fields (per the
+       user, 2026-09-17) — kept editable even though the mapper does read a real
+       header value for Date/Operator, since correcting a misrecorded name/date isn't
+       the same risk as overriding a measured quantity. -->
   <div class="field-row">
     <div class="field"><span class="lbl">Test Laboratory:</span><span class="val" data-slot="testLab" data-editable></span></div>
     <div class="field"><span class="lbl">Test Date:</span><span class="val" data-slot="testDate" data-editable></span></div>
@@ -28,7 +46,7 @@
     <div class="field"><span class="lbl">Housing ID:</span><span class="val" data-slot="housingId" data-editable></span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Spin-on (Yes/No):</span><span class="val" data-slot="spinOn" data-editable></span></div>
+    <div class="field"><span class="lbl">Spin-on (Yes/No):</span><span class="val" data-slot="spinOn"></span></div>
     <div class="field"><span class="lbl">Element first bubble point:</span><span class="val" data-slot="minBubblePoint" data-editable></span><span class="unit">Pa</span></div>
   </div>
   <!-- Only populated on MidstreamFlag (series/dual-filter) files — see
@@ -42,24 +60,24 @@
   <h2>Operating Conditions</h2>
   <h3>Test Fluid</h3>
   <div class="field-row">
-    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="fluidType" data-editable></span></div>
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="fluidType"></span></div>
     <div class="field"><span class="lbl">Ref.:</span><span class="val" data-slot="fluidRef" data-editable></span></div>
     <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="fluidBatch" data-editable></span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Viscosity at test temperature:</span><span class="val" data-slot="viscosity" data-editable></span><span class="unit">mm&sup2;/s</span></div>
-    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature" data-editable></span><span class="unit">&deg;C</span></div>
+    <div class="field"><span class="lbl">Viscosity at test temperature:</span><span class="val" data-slot="viscosity"></span><span class="unit">mm&sup2;/s</span></div>
+    <div class="field"><span class="lbl">Temperature:</span><span class="val" data-slot="temperature"></span><span class="unit">&deg;C</span></div>
   </div>
   <div class="field-row">
     <div class="field"><span class="lbl">Anti-static (Yes/No):</span><span class="val" data-slot="antiStaticYesNo" data-editable></span></div>
     <div class="field"><span class="lbl">Anti-static Type:</span><span class="val" data-slot="antiStaticType" data-editable></span></div>
-    <div class="field"><span class="lbl">Conductivity:</span><span class="val" data-slot="conductivity" data-editable></span><span class="unit">pS/m</span></div>
+    <div class="field"><span class="lbl">Conductivity:</span><span class="val" data-slot="conductivity"></span><span class="unit">pS/m</span></div>
   </div>
 
   <h3>Test Contaminant</h3>
   <div class="field-row">
-    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="contaminantType" data-editable></span></div>
-    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="contaminantBatch" data-editable></span></div>
+    <div class="field"><span class="lbl">Type:</span><span class="val" data-slot="contaminantType"></span></div>
+    <div class="field"><span class="lbl">Batch No.:</span><span class="val" data-slot="contaminantBatch"></span></div>
   </div>
 
   <h3>Test System</h3>
@@ -67,19 +85,19 @@
        flow rate the way ISO 16889 has. Ramp Time is the cyclic flow transition
        duration (11.8/figure 2) — see iso23369Mapper.js's RiseTime/RampUpTime note. -->
   <div class="field-row">
-    <div class="field"><span class="lbl">Flow rate, q&#772;:</span><span class="val" data-slot="testFlowrateQ" data-editable></span><span class="unit">L/min</span></div>
-    <div class="field"><span class="lbl">Initial volume:</span><span class="val" data-slot="testVolume" data-editable></span><span class="unit">L</span></div>
+    <div class="field"><span class="lbl">Flow rate, q&#772;:</span><span class="val" data-slot="testFlowrateQ"></span><span class="unit">L/min</span></div>
+    <div class="field"><span class="lbl">Initial volume:</span><span class="val" data-slot="testVolume"></span><span class="unit">L</span></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">q<sub>min</sub>:</span><span class="val" data-slot="qMinFlow" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"><span class="lbl">q<sub>min</sub>:</span><span class="val" data-slot="qMinFlow"></span><span class="unit">L/min</span></div>
     <div class="field"></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">q<sub>max</sub>:</span><span class="val" data-slot="qMaxFlow" data-editable></span><span class="unit">L/min</span></div>
+    <div class="field"><span class="lbl">q<sub>max</sub>:</span><span class="val" data-slot="qMaxFlow"></span><span class="unit">L/min</span></div>
     <div class="field"></div>
   </div>
   <div class="field-row">
-    <div class="field"><span class="lbl">Ramp Time, t<sub>R,F</sub>:</span><span class="val" data-slot="rampTime" data-editable></span><span class="unit">sec</span></div>
+    <div class="field"><span class="lbl">Ramp Time, t<sub>R,F</sub>:</span><span class="val" data-slot="rampTime"></span><span class="unit">sec</span></div>
     <div class="field"><span class="lbl">Final volume:</span><span class="val" data-slot="testVolumeFinal" data-editable></span><span class="unit">L</span></div>
   </div>
   <div class="field-row">
@@ -98,14 +116,14 @@
         <td class="val" data-slot="injSystemVolumeInitial" data-editable></td>
         <td class="val" data-slot="injSystemVolumeFinal" data-editable></td>
         <th>Injection flow q&#772;<sub>i</sub> (L/min)</th>
-        <td class="val" data-slot="injectionFlowrateQia" data-editable></td>
+        <td class="val" data-slot="injectionFlowrateQia"></td>
       </tr>
       <tr>
         <th>Concentration (mg/L)</th>
         <td class="val" data-slot="injectionGravInitial" data-editable></td>
         <td class="val" data-slot="injectionGravFinal" data-editable></td>
         <th>Concentration c&#772;<sub>i</sub> (mg/L)</th>
-        <td class="val" data-slot="injectionGravAverage" data-editable></td>
+        <td class="val" data-slot="injectionGravAverage"></td>
       </tr>
     </tbody>
   </table>
@@ -119,14 +137,14 @@
       <tr>
         <th>Upstream</th>
         <td class="val" data-slot="counterUpstream" data-editable></td>
-        <td class="val" data-slot="sensorFlowRateUpstream" data-editable></td>
-        <td class="val" data-slot="dilutionRatioUpstream" data-editable></td>
+        <td class="val" data-slot="sensorFlowRateUpstream"></td>
+        <td class="val" data-slot="dilutionRatioUpstream"></td>
       </tr>
       <tr>
         <th>Downstream</th>
         <td class="val" data-slot="counterDownstream" data-editable></td>
-        <td class="val" data-slot="sensorFlowRateDownstream" data-editable></td>
-        <td class="val" data-slot="dilutionRatioDownstream" data-editable></td>
+        <td class="val" data-slot="sensorFlowRateDownstream"></td>
+        <td class="val" data-slot="dilutionRatioDownstream"></td>
       </tr>
     </tbody>
   </table>
