@@ -8,6 +8,255 @@ tree is in git (see the README); this file is the milestone layer above that.
 
 Newest entry at the top. No semver — this project doesn't version formally.
 
+## 2026-09-17 — Report field editability audit (all 5 standards)
+
+Full field-by-field `data-editable` reclassification, deferred from the 2026-09-11
+sidebar/pencil-edit redesign (see WISHLIST.md's now-resolved entry). The rule: any
+field whose value comes FROM the .DAT file (a header or channel) or is CALCULATED
+from values that are, is locked — overriding it would misrepresent what the rig
+actually measured. Decided with the user across three genuine judgment calls before
+implementing:
+
+- **Administrative identity fields stay editable** even where header-sourced (Test
+  Date, Operator, Element/Filter ID, Test ID, Project ID, Test Time) — correcting a
+  misrecorded name/ID/date isn't the same risk as overriding a measured quantity.
+- **Documented "estimate now, override later" fields stay editable** — Test Volume
+  Final (all 4 particle-counting standards), and ISO 16889/23369's Injection System
+  Volume Initial/Final and Base Upstream Gravimetric Level. Each mapper's own
+  comments already say so explicitly (e.g. "no header of its own... still
+  data-editable") — treated as a third exception class alongside the existing
+  pressure (already locked, no UI) and gravimetric (dialog-routed) cases, not
+  locked, since the codebase already built these as overridable estimates on
+  purpose.
+- **Calculated fields are locked outright**, including the two true gravimetric
+  lab results' own downstream calculations: Non-Retained Mass (Mnr) and Retained
+  Capacity (Cr) (ISO 4548-12/19438), and Injection Gravimetric Average (all 4
+  particle-counting standards). Per the user: "editable fields that deal with
+  calculations [should] push the user into the standard operation path" — a
+  correction belongs in the real inputs (Injection Gravimetric Initial/Final,
+  routed to the Add/Edit Gravimetrics dialog), which already auto-recompute these
+  outputs, not a direct override of the output itself (today's bare `prompt()`
+  path for these three could go silently stale on the next recompute anyway).
+
+Free-text `comments` stays editable everywhere despite technically reading a
+`Comments` .DAT header key in most standards — locking an annotation field would
+defeat its purpose regardless of what that header happens to contain. ISO 19438's
+`dilutionSensorType` is locked (a genuine live per-file derived value — which
+sensor, LB or LS, the analysis selected); its `countingMethod` stays editable (a
+hardcoded literal, "Online," with no real per-file data behind it either way).
+ISO 3968's dozen bypass-valve/leak-rate fields (Page 2) are untouched — confirmed
+zero .DAT concept of either exists anywhere in that standard's engine/mapper, so
+these were never a lock candidate to begin with.
+
+- Mechanically: `data-editable` attribute removed from the locked fields'
+  `<span>`/`<td>` elements across all 5 standards' Page 1 templates (plus one
+  `<span>` nested in a `<td>` for ISO 19438's Mnr/Cr). No code changes needed
+  beyond the templates — `applyFieldEditButtons` and the pencil-click routing
+  (`reportView.js`/`app.js`) both key purely off `[data-editable]` presence, so
+  removing the attribute is sufficient on its own.
+- Verified: full `run-all-selfchecks.js` and Playwright regression suite
+  (`session-save-load-check.js`, `compare-templates-check.js`,
+  `machine-profiles-save-load-check.js`, `audit-view-check.js`) all pass. A
+  dedicated Playwright check confirmed the exact expected editable-field set for
+  all 5 standards against real fixtures (including ISO 23369 with its companion
+  file), spot-checking that locked/kept-editable fields land exactly as decided.
+- Cache version it left the tree at: webreportwriter-v181
+
+## 2026-09-17 — Empty leftover toolbars removed; Machine Profiles table scrolls
+
+Fourth round of sidebar feedback, same day.
+
+- **Removed three now-empty `.context-toolbar` divs** (`#context-explorer`,
+  `#context-compare`, `#context-machineProfiles`) — leftover from the
+  2026-09-11/17 rounds that relocated their buttons into the sidebar, they were
+  never deleted, just emptied. `.toolbar`'s own card styling (padding/border/
+  background) rendered them as a visible empty box above Explorer/Compare/
+  Machine Profiles' content for no reason. Confirmed nothing referenced them by
+  id anywhere before deleting outright (`showView`'s `.context-toolbar`
+  querySelectorAll loop just does one fewer no-op iteration per removed mode).
+  Relocated the still-relevant "merge, don't replace" doc comment for machine
+  profile imports to sit next to the actual Save/Load buttons in the sidebar,
+  rather than losing it.
+- **Machine Profiles table now scrolls horizontally instead of clipping** — a
+  rig with a full Counter/Sensor/LS/LBE summary plus Cal Method/Date can run
+  wider than the content column. Wrapped in a new `.mp-table-wrap`
+  (`overflow-x:auto`), the same pattern already established for the audit
+  trail's own wide tables (`.audit-table-wrap`) and ISO 16889/23369's page-2
+  rotated tables (`.w16889-p2-scroll`) — this table just hadn't gotten the same
+  treatment yet.
+- Verified: a Playwright check confirmed all three context-toolbar ids are
+  genuinely gone from the DOM, and that `.mp-table-wrap` has `overflow-x:auto`
+  around a table forced wider than its container by a long label. Full
+  regression suite (`run-all-selfchecks.js`, `session-save-load-check.js`,
+  `compare-templates-check.js`, `machine-profiles-save-load-check.js`,
+  `audit-view-check.js`) still passes.
+- Cache version it left the tree at: webreportwriter-v180
+
+## 2026-09-17 — Sidebar polish round 2: disabled states, active-color consistency, scroll, one button style
+
+Third round of feedback on the sidebar work.
+
+- **Save Report disabled with no file loaded** — greyed out (`css/app.css`'s
+  shared `button:disabled` treatment) rather than silently producing a
+  near-empty session; `updateReportingControlsVisibility()` sets
+  `saveBtn.disabled = !currentDf` and a "Load a file first" title.
+- **Report content no longer pinned above the scroll.** `.content` (not `.view`)
+  now owns the scrollbar — context-toolbar and view scroll together as one
+  normal unit. This is NOT a return to the earlier `position:sticky` attempt
+  that had a real, documented bug in this exact shell (see `app.css`'s own
+  history note, preserved) — just letting go of the "pin chrome above scrolling
+  content" idea entirely, since nothing left in a context-toolbar needs pinning
+  now that Report Options/Print/Save/etc. all live in the always-visible
+  sidebar.
+- **Save/Load machine profiles buttons relocated to sidebar Actions**, shown
+  only while on the Machine Profiles view — same gating pattern as
+  Report/Compare/Explorer's own Actions buttons.
+- **Disclosure toggle buttons (Configuration, Report Options, Report Logo,
+  Units, Paper) now get `.active` styling while their panel is expanded** —
+  reuses the exact same solid-accent treatment `showView` already gives
+  "Standard Report" while Report is the active mode, via a new shared
+  `wireDisclosureToggle` helper (`app.js`) replacing five near-identical
+  one-line toggle handlers.
+- **"Change Company Logo (filename)" → "Change Logo (filename)"** — shorter,
+  fits the sidebar width better once a logo's already set.
+- **One button style for the whole sidebar.** Previously a mix: File/Actions/
+  About used a bordered white box that inverted to solid black on hover, while
+  Mode/Configuration's nested items were already borderless with an accent-soft
+  hover. Unified onto the borderless style everywhere — `.sidebar-group button`
+  and `.sidebar-group.view-switch button` merged into one rule (`css/app.css`);
+  `.active`/`.primary` both read as a permanent, border-free accent fill rather
+  than reintroducing a border for emphasis.
+- **Found along the way, fixed as found (both pre-existing, unrelated to this
+  round's actual changes):** `tools/render-check/machine-profiles-save-load-check.js`
+  never got updated when Machine Profiles moved under Configuration two rounds
+  ago (2026-09-11) — it was clicking a nav button no longer visible without
+  expanding Configuration first, silently never re-run since. Separately,
+  `audit-view-check.js` asserted `#auditSwitch` shows "4 standards + Explorer"
+  (5 buttons) — stale since ISO 23369 became the 5th standard; actual/correct
+  count is 6. Both fixed; both dev-tooling-only, no shipped-app impact.
+- Verified: full `run-all-selfchecks.js`, `session-save-load-check.js`,
+  `compare-templates-check.js`, `machine-profiles-save-load-check.js`, and
+  `audit-view-check.js` all pass. A one-off Playwright check confirmed
+  Save Report's disabled↔enabled transition, Configuration's active background
+  color literally matching Standard Report's (`rgb(47, 93, 138)` both), Machine
+  Profiles' Actions buttons appearing correctly, and `.content`/`.view`'s
+  overflow ownership swap.
+- Cache version it left the tree at: webreportwriter-v179
+
+## 2026-09-17 — Sidebar follow-up: Configuration as a real disclosure, Actions per-mode, About
+
+Second round of internal feedback on the 2026-09-11 sidebar redesign below.
+
+- **Configuration now mirrors Mode's own shape exactly**: Machine Profiles stays a
+  direct-navigation button; Report Logo, Units, and Paper are each their OWN
+  nested disclosure (same `.standard-switch` expand pattern, one level deeper),
+  revealing their actual controls only once clicked — the same way `#standardSwitch`
+  reveals standards under "Standard Report." Units/Paper are now one button per
+  choice (`#unitsPanel`'s `[data-unit]`, `#paperPanel`'s `[data-paper]`) instead of
+  a `<select>`.
+- **The underlying `<select id="unitSelect">`/`<select id="paperSizeSelect">`
+  elements were NOT removed** — kept as hidden state stores, driven by the new
+  buttons via a small generic `wireButtonGroupToSelect` helper (`app.js`) that
+  sets `.value` and dispatches a real `"change"` event. Every existing
+  `byId("unitSelect").value` read (18+ call sites) and both selects' own
+  `"change"` listeners keep working completely unchanged — only the visible
+  control changed. `pdf-report.js`/`pdf-audit.js`/`pdf-compare.js`/
+  `compare-templates-check.js` updated to click through the new buttons instead
+  of Playwright's `selectOption` (which requires visibility — a hidden select
+  would have silently no-op'd inside a `.catch()` in three of those four
+  scripts). Verified: a generated A4 PDF's actual `/MediaBox` is 594.96×841.92pt,
+  confirming the click-through genuinely reaches `applyPaperSize`, not a no-op.
+- **Explorer's "Save/Load chart tabs" relocated to the sidebar Actions group**,
+  shown only while Data File Explorer is the active mode — same mode-gating
+  pattern `showView` already uses for Report's/Compare's own Actions buttons.
+- **New "About" labeled group**: "About Me" renamed to "Help" (same dialog,
+  same `helpBtn` id); new "Version Info" button opens a small dialog reading the
+  live active Cache Storage entry name (`caches.keys()`) rather than a second,
+  hand-maintained copy of `service-worker.js`'s `CACHE_NAME` — single source of
+  truth, can't drift out of sync with the real bumped value the way a duplicated
+  constant could.
+- Verified: full `run-all-selfchecks.js` suite, `session-save-load-check.js`,
+  `compare-templates-check.js` (including its updated Paper-reachability
+  assertion) all pass; a one-off Playwright check confirmed the button-driven
+  Units/Paper selection correctly propagates through to `document.body.dataset.paper`
+  and the hidden selects' own values, exactly as a real `<select>` change would.
+- Cache version it left the tree at: webreportwriter-v178
+
+## 2026-09-11 — Sidebar redesign: File / Mode / Configuration, Report Options, pencil-edit
+
+Internal team feedback pass. Restructures the sidebar into three consistently
+labeled groups and replaces double-click-to-edit with a discoverable pencil icon.
+
+- **Sidebar reorganized into File / Mode / Configuration** groups (each with the
+  same uppercase label styling Units/Paper already used). Mode lists Standard
+  Report, Data File Explorer, then Compare Files (now labeled BETA — still
+  evolving). Machine Profiles moved out of Mode into a new Configuration
+  disclosure (alongside Add Company Logo, Units, Paper), since it's a settings
+  screen, not a report mode. `showView`'s active-button selector broadened from
+  `.view-switch > button` to `button[data-view]` so this relocation doesn't break
+  active-state tracking — confirmed `data-view` is a reliable global marker, never
+  present on `#standardSwitch`/`#auditSwitch`'s own nested buttons.
+- **"Load File" replaces separate "Load data file"/"Load session" controls** — one
+  input (`.dat,.DAT,.json`), dispatched by extension in `app.js`'s `fileInput`
+  change handler; `.csv`/`.txt`/`.sav` dropped (unneeded), legacy `.SAVE` files
+  from older report-writer tools deliberately not addressed yet. `readFile`/
+  `loadFileText`/`loadSessionData` themselves are unchanged — `loadFileText`
+  unconditionally resets sensor/tare/companion/store state in ways a session
+  restore must not do, so the two flows stay structurally separate underneath
+  the one entry point.
+- **New "Report Options" sidebar disclosure** (same expand-under-parent pattern
+  as `#standardSwitch`) holds every per-standard report-shaping control formerly
+  spread across the report toolbar: sensor/pressure-view pickers, display sizes,
+  gravimetrics, count details, tare/companion file. Shown only once a file is
+  loaded. Auto-collapses on leaving Report mode.
+- **Print/Save relocated to the sidebar** ("Load File → Create Report → Print or
+  Save Report" now visible as actual navigation) — Save Report (renamed from
+  "Save session (.json)", id unchanged) and Print Report for the Standard Report
+  flow, Save/Load comparison templates and Print for Compare Files. Mode-gated in
+  `showView` exactly as they always were by their old `.context-toolbar` ancestor
+  — relocation only, no visibility-rule change.
+- **Double-click-to-edit replaced by a pencil (✎) icon** next to every editable
+  report field, reusing the existing chart-axis-edit glyph idiom
+  (`chartAxisControls.js`). New `applyFieldEditButtons` in `reportView.js`,
+  idempotent and sibling-inserted like `applyControlWarningMarkers`. Gravimetric
+  fields' pencil (`injectionGravInitial`/`injectionGravFinal`/`finalGravimetricGf`)
+  now opens the existing Add/Edit Gravimetrics dialog instead of a bare prompt —
+  fixes a real inconsistency where editing those fields inline skipped the
+  dialog's `recomputeGravimetricDerived()`/warnings-count refresh. Every other
+  editable field keeps the same prompt()-based override flow, just triggered by
+  the pencil instead of a double-click.
+- **Real bug fixed while wiring the pencil**: `fillSlots`' unit-relabeling read
+  `el.nextElementSibling`, assuming it was always the `.unit` span — true only
+  until something else (a `.field-warn` marker, now also a pencil button) gets
+  inserted as a sibling, after which SI/US toggling silently stopped relabeling
+  that field's unit text. This was already live for any control-target-linked
+  unit field carrying a warning marker, not just newly introduced by this change.
+  Fixed by scoping the lookup to the parent `.field`'s own `.unit` child instead.
+- Verified: full `run-all-selfchecks.js` fidelity suite (unaffected, as expected —
+  no analysis/mapper logic touched) plus `session-save-load-check.js` (updated for
+  the consolidated file input and pencil-click edit, confirmed the field it
+  exercises — `testLab` — isn't a gravimetric spec id) all pass; a one-off
+  Playwright check confirmed a gravimetric field's pencil opens the dialog with no
+  native `prompt()`, while a non-gravimetric field's pencil still does.
+- Deferred, not part of this pass: a full field-by-field `data-editable`
+  audit/lockdown; a "truncate report to an earlier termination point" editable
+  field (needs its own analysis-engine design, not a display-only edit); loading
+  legacy `.SAVE` files; any manual acknowledge/dismiss for control-target
+  warnings.
+- **Follow-up fix (same day, reported by the user from a real screenshot)**:
+  `applyFieldEditButtons`' sibling-insertion assumed `[data-editable]` was always
+  a `<span>`/`<div>` — true almost everywhere, but ISO 16889/23369's Injection
+  System and Counting System tables put `[data-editable]` directly on a `<td>`.
+  Inserting "afterend" there made the pencil a direct child of `<tr>`, an illegal
+  table child the browser recovers from by inventing an anonymous cell — visible
+  as stray boxes and shifted columns in exactly those two tables. Fixed by
+  appending the button INSIDE the cell instead when the target is a `<td>`/`<th>`,
+  safe under the same fillSlots-wipes-then-this-refills per-render ordering as
+  the sibling case. Verified: a Playwright structural check confirms zero
+  `<button>` elements land as direct `<tr>` children after the fix, plus a fresh
+  screenshot of both tables and a full session-save-load-check.js re-run.
+- Cache version it left the tree at: webreportwriter-v177
+
 The practical "version" marker is `service-worker.js`'s `CACHE_NAME`. It's bumped
 whenever a precached file changes (so a returning browser gets the update instead of a
 stale cache), and it's the quickest way to answer "did I actually get this change" —

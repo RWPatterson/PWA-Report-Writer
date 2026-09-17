@@ -8,7 +8,7 @@
    related to cache here.
    ===================================================================================== */
 
-const CACHE_NAME = "webreportwriter-v175";
+const CACHE_NAME = "webreportwriter-v181";
 
 const PRECACHE_URLS = [
   "./",
