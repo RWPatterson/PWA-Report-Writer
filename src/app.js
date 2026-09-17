@@ -69,7 +69,7 @@ import { openTarePrompt } from "./report/tareEntryView.js";
 import { openCompanionFilePrompt } from "./report/companionEntryView.js";
 import { loadAddCountDetails, saveAddCountDetails } from "./report/addCountDetails.js";
 import { loadCompanyLogo, saveCompanyLogo, clearCompanyLogo } from "./report/companyLogoStore.js";
-import { openHelpDialog } from "./helpDialogView.js";
+import { openHelpDialog, openVersionInfoDialog } from "./helpDialogView.js";
 //#endregion
 
 //#region standards registry & module state
@@ -621,13 +621,15 @@ function showView(name) {
   // Never persist "audit" as the last view — see VALID_VIEWS's own comment; the
   // hidden route must not survive a reload, not even as a stale, never-restored key.
   if (name !== "audit") saveLastView(name);
-  // ">" (direct children only): #standardSwitch's own buttons are nested INSIDE
-  // .view-switch too (so it visually expands under the Report button — see
-  // index.html), and they carry data-standard, not data-view — the plain
-  // ".view-switch button" descendant selector would also match them and, since
-  // b.dataset.view is undefined for those, incorrectly clear whichever standard
-  // button was active every time this runs.
-  document.querySelectorAll(".view-switch > button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+  // [data-view] (attribute selector, not ".view-switch > button"): a real mode
+  // button is the ONLY kind of button anywhere in index.html that carries a
+  // data-view attribute — #standardSwitch's buttons carry data-standard,
+  // #auditSwitch's carry data-audit, #configSwitch's own settings controls carry
+  // neither — so this is a reliable global marker regardless of where a given
+  // data-view button physically lives in the sidebar (Machine Profiles lives
+  // inside #configSwitch, nested two levels deep, not a direct .view-switch
+  // child, which is exactly why this moved off the old ">" direct-child selector).
+  document.querySelectorAll("button[data-view]").forEach(b => b.classList.toggle("active", b.dataset.view === name));
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
   // Each mode's own controls live in its own .context-toolbar (index.html) — shown/
   // hidden the same way .view is, so switching mode swaps both the content AND
@@ -639,6 +641,27 @@ function showView(name) {
   // lists what's actually auditable, not Report's full standard list.
   byId("standardSwitch").classList.toggle("active", name === "report");
   byId("auditSwitch").classList.toggle("active", name === "audit");
+  // Report Options is a manual disclosure (see its own toggle listener below), not
+  // mode-driven like #standardSwitch — but it still auto-collapses on leaving
+  // Report, same as #standardSwitch effectively does, so it doesn't stay stuck
+  // open if the user wanders off and comes back later.
+  if (name !== "report") {
+    byId("reportOptionsPanel").classList.remove("active");
+    byId("reportOptionsToggleBtn").classList.remove("active");
+  }
+  // Sidebar Print/Save: relocated from the old #context-report/#context-compare
+  // toolbars verbatim (same ids, same unconditional-while-the-mode-is-active
+  // visibility they always had) — gated here instead of by a .context-toolbar
+  // ancestor now that they no longer live inside one.
+  byId("saveTabsBtn").style.display = (name === "explorer") ? "" : "none";
+  byId("loadTabsBtn").style.display = (name === "explorer") ? "" : "none";
+  byId("saveBtn").style.display = (name === "report") ? "" : "none";
+  byId("printBtn").style.display = (name === "report") ? "" : "none";
+  byId("saveCompareTemplatesBtn").style.display = (name === "compare") ? "" : "none";
+  byId("loadCompareTemplatesBtn").style.display = (name === "compare") ? "" : "none";
+  byId("printCompareBtn").style.display = (name === "compare") ? "" : "none";
+  byId("saveMachineProfilesBtn").style.display = (name === "machineProfiles") ? "" : "none";
+  byId("loadMachineProfilesBtn").style.display = (name === "machineProfiles") ? "" : "none";
   if (name === "explorer") {
     // Same "always re-render this view's own render function on switch" convention
     // every other branch below already follows — without this, #view-explorer never
@@ -659,9 +682,57 @@ function showView(name) {
   }
   updateReportingControlsVisibility();
 }
-document.querySelectorAll(".view-switch > button").forEach(b => {
+document.querySelectorAll("button[data-view]").forEach(b => {
   b.addEventListener("click", () => showView(b.dataset.view));
 });
+
+/* Configuration/Report Options/Report Logo/Units/Paper: pure disclosure toggles,
+   deliberately NOT routed through showView — expanding one must not change
+   currentStandardId, the current view, or the persisted last-view, unlike
+   #standardSwitch/#auditSwitch which really are mode-driven. Same .standard-switch
+   expand/collapse CSS, just triggered by a plain click instead of a mode switch.
+   The toggle BUTTON itself also gets .active while its panel is open — same
+   solid-accent highlight showView already gives "Standard Report" while Report is
+   the active mode (button[data-view].active, css/app.css), so an expanded
+   disclosure reads the same way an active mode does, not just its panel opening.
+   @param {string} toggleBtnId @param {string} panelId */
+function wireDisclosureToggle(toggleBtnId, panelId) {
+  const toggleBtn = byId(toggleBtnId), panel = byId(panelId);
+  toggleBtn.addEventListener("click", () => {
+    const isOpen = panel.classList.toggle("active");
+    toggleBtn.classList.toggle("active", isOpen);
+  });
+}
+wireDisclosureToggle("configToggleBtn", "configSwitch");
+wireDisclosureToggle("reportOptionsToggleBtn", "reportOptionsPanel");
+// Report Logo/Units/Paper: the same disclosure pattern one level deeper, nested
+// inside Configuration — each its own independent expand/collapse, same as above.
+wireDisclosureToggle("logoToggleBtn", "logoPanel");
+wireDisclosureToggle("unitsToggleBtn", "unitsPanel");
+wireDisclosureToggle("paperToggleBtn", "paperPanel");
+
+/* wireButtonGroupToSelect: Units/Paper are now presented as one button per choice
+   (#unitsPanel's [data-unit] buttons, #paperPanel's [data-paper] buttons) instead
+   of a <select> — but every OTHER piece of this app still reads/writes them as a
+   plain <select>.value (18+ call sites) and listens for its "change" event
+   (this file's own units/print region below). Rather than touching all of that,
+   the <select> stays exactly as it was, just visually hidden — these buttons
+   drive it the same way a real user picking an <option> would: set .value, fire
+   "change", let every existing listener react exactly as before. Generic (no
+   opinion on units vs. paper specifically), so one small helper covers both.
+   @param {string} panelId @param {string} datasetKey @param {HTMLSelectElement} select */
+function wireButtonGroupToSelect(panelId, datasetKey, select) {
+  const buttons = document.querySelectorAll("#" + panelId + " button");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      select.value = btn.dataset[datasetKey];
+      select.dispatchEvent(new Event("change"));
+      buttons.forEach(b => b.classList.toggle("active", b === btn));
+    });
+  });
+}
+wireButtonGroupToSelect("unitsPanel", "unit", byId("unitSelect"));
+wireButtonGroupToSelect("paperPanel", "paper", byId("paperSizeSelect"));
 
 // ---- Hidden route: the Audit Trail tab (developer-only, see auditView.js's own
 // header comment on why — never surfaced to a customer). No URL param, no visible
@@ -1050,6 +1121,22 @@ function updateReportingControlsVisibility() {
   // a report-shape preference like paper size, settable whether or not a file is
   // currently loaded/valid.
   const showAddCountDetails = reportActive && !!standard.hasCountDetails;
+
+  // Report Options' own toggle button: only worth showing once there's a report
+  // AND a file loaded for it to configure — matches the "after a file is loaded"
+  // requirement directly, same reportActive/currentDf values every other control
+  // in this function already computes.
+  byId("reportOptionsToggleBtn").style.display = (reportActive && currentDf) ? "" : "none";
+
+  // Save Report writes sourceFileText: null with no file loaded (see the saveBtn
+  // handler below) — technically works, but produces a session with nothing real
+  // to resume, which isn't a state worth offering as a save target. Disabled
+  // (grayed, css/app.css's shared button:disabled treatment) rather than hidden —
+  // it's still the right place to look once a file IS loaded, same "show the
+  // control, explain why it can't be used yet" idea as the standard-compatibility
+  // graying on #standardSwitch.
+  byId("saveBtn").disabled = !currentDf;
+  byId("saveBtn").title = currentDf ? "" : "Load a file first";
 
   byId("sensorDivider").style.display = showSensor ? "" : "none";
   byId("sensorGroup").style.display = showSensor ? "" : "none";
@@ -1673,7 +1760,7 @@ function readCompanyLogoFile(file) {
  *  called once at startup and after every upload/remove. */
 function updateCompanyLogoButtonState() {
   const logo = loadCompanyLogo();
-  byId("companyLogoBtn").textContent = logo ? "Change Company Logo (" + logo.fileName + ")" : "Add Company Logo";
+  byId("companyLogoBtn").textContent = logo ? "Change Logo (" + logo.fileName + ")" : "Add Company Logo";
   byId("removeCompanyLogoBtn").style.display = logo ? "" : "none";
 }
 //#endregion
@@ -1913,11 +2000,36 @@ function readFile(file) {
 
 const fileInput = byId("fileInput");
 byId("loadDataBtn").addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", (e) => { const f = e.target.files[0]; if (f) readFile(f); e.target.value = ""; });
+// One control for both "a new test to analyze" and "a previously saved report" —
+// agnostic about which it turns out to be, dispatched purely by extension. Kept as
+// a thin dispatcher rather than merging readFile/loadFileText with loadSessionData
+// themselves: loadFileText unconditionally resets sensor/tare/companion/store state
+// on every call, which a session restore must NOT do, so the two flows stay
+// structurally separate underneath this one entry point.
+fileInput.addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  if (f.name.toLowerCase().endsWith(".json")) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        loadSessionData(JSON.parse(reader.result), f.name);
+        byId("statusText").textContent = "Loaded " + f.name;
+      } catch (err) {
+        byId("statusText").textContent = "Could not read " + f.name + ": not a valid session file";
+      }
+    };
+    reader.readAsText(f);
+  } else {
+    readFile(f);
+  }
+});
 
 // Always available, no currentDf/state gating — same "always there" treatment as
 // Print report, not the file-dependent toolbar buttons.
 byId("helpBtn").addEventListener("click", () => openHelpDialog());
+byId("versionInfoBtn").addEventListener("click", () => openVersionInfoDialog());
 //#endregion
 
 //#region downloads / session persistence
@@ -1978,23 +2090,6 @@ byId("saveBtn").addEventListener("click", () => {
   };
   download(fileName, JSON.stringify(session, null, 1), "application/json");
   byId("statusText").textContent = "Saved " + fileName;
-});
-
-byId("loadBtn").addEventListener("click", () => byId("loadInput").click());
-byId("loadInput").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      loadSessionData(JSON.parse(reader.result), file.name);
-      byId("statusText").textContent = "Loaded " + file.name;
-    } catch (err) {
-      byId("statusText").textContent = "Could not read " + file.name + ": not a valid session file";
-    }
-    e.target.value = "";
-  };
-  reader.readAsText(file);
 });
 
 /** Restores a parsed report_session.json (see the save handler's format comment above).
@@ -2229,18 +2324,40 @@ byId("paperSizeSelect").addEventListener("change", (e) => applyPaperSize(e.targe
 applyPaperSize(byId("paperSizeSelect").value);
 //#endregion
 
-//#region editable report fields (double-click to override)
+//#region editable report fields (pencil-icon to override)
 /* Reads/writes through reportView's unit helpers so a value typed while viewing PSI
    is converted back to canonical kPa before it's stored, and vice versa.
 
    With a file loaded, an edit is a per-file User Entry — exactly as before, never
-   persisted beyond an explicit "Save session" file. With NO file loaded, an edit
+   persisted beyond an explicit "Save Report" file. With NO file loaded, an edit
    instead sets/clears a persisted Custom Default (customDefaults.js), so it survives
-   reloads and pre-fills every future report until cleared. */
-document.getElementById("view-report").addEventListener("dblclick", (e) => {
-  const target = e.target.closest("[data-editable]");
-  if (!target) return;
-  const id = target.dataset.slot;
+   reloads and pre-fills every future report until cleared.
+
+   Delegated click on #view-report (not a per-button listener on each .field-edit-btn,
+   per reportView.js's applyFieldEditButtons) — fillTemplate/renderReportPages fully
+   rebuild this subtree on every re-render (unit toggle, sensor switch, an edit's own
+   refreshReport call), so a listener on the stable container survives that for free,
+   the same way the double-click listener this replaces always did.
+
+   Gravimetric-spec fields (injectionGravInitial/injectionGravFinal/finalGravimetricGf,
+   see each STANDARDS[..].gravimetricSpecs entry) are a special case: their pencil
+   re-routes to the existing "Add/Edit Gravimetrics" dialog trigger instead of the
+   plain prompt() flow below — that dialog already does the correct
+   recomputeGravimetricDerived()+updateReportingControlsVisibility() sequence (see
+   its own onSave handler) that a bare prompt() edit never did, so this is a pure
+   re-routing to an existing, already-correct entry point, not new recompute logic. */
+document.getElementById("view-report").addEventListener("click", (e) => {
+  const btn = e.target.closest(".field-edit-btn");
+  if (!btn) return;
+  const id = btn.dataset.editFor;
+
+  const standard = STANDARDS[currentStandardId];
+  const isGravimetricSpec = standard.gravimetricSpecs && standard.gravimetricSpecs.some(s => s.id === id);
+  if (isGravimetricSpec) {
+    byId("gravimetricBtn").click();
+    return;
+  }
+
   const units = byId("unitSelect").value;
   const current = currentDisplayValue(store, id, units);
 

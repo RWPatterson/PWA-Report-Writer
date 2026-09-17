@@ -80,6 +80,7 @@ function fillTemplate(root, store, units) {
   fillIso3968AverageDpTables(root, store, units);
   fillReportCharts(root, store, units);
   applyControlWarningMarkers(root, store);
+  applyFieldEditButtons(root);
   applyCompanyLogo(root);
 }
 //#endregion
@@ -167,16 +168,24 @@ function fillSlots(root, store, units) {
     el.textContent = text;
     el.classList.toggle("overridden", store.isOverridden(id));
 
-    // Every active standard's templates print a value's unit as a static sibling
-    // <span class="unit"> — that text was hardcoded and never relabeled on a
-    // unit-system toggle even though the VALUE itself was already converting
-    // correctly, which read as broken. Relabel it here,
+    // Every active standard's templates print a value's unit as a static
+    // <span class="unit"> in the same .field row — that text was hardcoded and
+    // never relabeled on a unit-system toggle even though the VALUE itself was
+    // already converting correctly, which read as broken. Relabel it here,
     // generically, for any data-slot field that actually has a canonical unit — a
     // field with no canonical unit (sizes, flow rates, concentrations — this project
     // deliberately never converts those, see units.js) leaves its sibling untouched.
+    // Scoped via the parent .field, NOT el.nextElementSibling: applyControlWarningMarkers/
+    // applyFieldEditButtons below insert their own sibling markup right after a
+    // data-slot element on the FIRST fillTemplate pass that adds them, so on every
+    // pass after that, the immediate next sibling is a stale marker/button from the
+    // previous render, not .unit, and this would silently stop relabeling. One
+    // .field row has exactly one .unit child (confirmed across every standard's
+    // templates), so scoping the lookup there is robust regardless of what else
+    // has been inserted into the row.
     if (canonicalUnit) {
-      const unitEl = el.nextElementSibling;
-      if (unitEl && unitEl.classList.contains("unit")) unitEl.textContent = displayUnit(canonicalUnit, units);
+      const unitEl = el.parentElement && el.parentElement.querySelector(".unit");
+      if (unitEl) unitEl.textContent = displayUnit(canonicalUnit, units);
     }
   });
 }
@@ -214,6 +223,64 @@ function applyControlWarningMarkers(root, store) {
     // to the end of .field, which would land it after the unit instead.
     target.insertAdjacentElement("afterend", marker);
   }
+}
+//#endregion
+
+//#region editable-field pencil buttons
+/* applyFieldEditButtons: a small "✎" button after every [data-editable] field,
+   replacing the old double-click-to-discover gesture with a visible affordance —
+   same glyph/tooltip idiom as core/charts/chartAxisControls.js's chart-edit
+   button (title/aria-label carry the meaning, not a text label, so it doesn't
+   read as visually louder than the value it sits next to). Standard-agnostic
+   presentation machinery: it has no idea what any field MEANS, only that
+   [data-editable] means "this one gets a pencil" — app.js's click handler is
+   what decides where a given field id's pencil actually routes (a plain
+   override prompt, or the gravimetric dialog for gravimetric-spec fields).
+
+   Idempotent (removes stale buttons from a prior fillTemplate call first), same
+   "remove-then-rebuild" pattern applyControlWarningMarkers uses, for the same
+   reason: refreshReport re-runs fillTemplate on the SAME already-rendered DOM
+   (unit toggle, sensor switch, an edit's own re-render), so without this a
+   second pass would double up buttons instead of refreshing them.
+
+   Inserted as a SIBLING via insertAdjacentElement("afterend") for the common case
+   ([data-editable] is a <span>/<div> inside a .field row) — fillSlots (above)
+   sets [data-editable]'s textContent directly on every pass, which would wipe any
+   CHILD node, hence sibling rather than child there. Runs AFTER
+   applyControlWarningMarkers so the on-page order reads value -> pencil ->
+   warning marker (each "afterend" insert lands immediately next to the target,
+   pushing the previous insert further out) — matches the visual reading order a
+   warning should trail the control that fixes it.
+
+   A handful of fields (ISO 16889/23369's Injection System and Counting System
+   tables) put [data-editable] directly on a <td> instead — "afterend" there
+   would insert the button as a DIRECT CHILD OF <tr>, which isn't a legal table
+   child, so the browser invents an anonymous cell to hold it and the whole row's
+   column layout breaks (real bug, found by the user: stray boxes, misaligned
+   columns). For a <td>/<th> target, append the button INSIDE the cell instead —
+   safe from the same fillSlots wipe-then-refill ordering as the sibling case
+   (fillSlots resets the cell's textContent, THEN this function re-adds the
+   button, every single fillTemplate pass), just landing as a child instead of a
+   sibling because a table cell has nowhere else valid to put it. */
+/** @param {HTMLElement} root */
+function applyFieldEditButtons(root) {
+  root.querySelectorAll(".field-edit-btn").forEach(b => b.remove());
+
+  root.querySelectorAll("[data-editable]").forEach(target => {
+    const id = target.dataset.slot;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "field-edit-btn";
+    btn.dataset.editFor = id;
+    btn.title = "Edit this field";
+    btn.setAttribute("aria-label", "Edit this field");
+    btn.textContent = "✎";
+    if (target.tagName === "TD" || target.tagName === "TH") {
+      target.appendChild(btn);
+    } else {
+      target.insertAdjacentElement("afterend", btn);
+    }
+  });
 }
 //#endregion
 

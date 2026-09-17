@@ -22,37 +22,43 @@ export function openHelpDialog() {
       "plus a raw data explorer and a cross-file comparer."),
 
     el("h4", { class: "mp-subhead" }, "1. Load a file"),
-    el("p", {}, "The \"Load data file\" button (top left) accepts the rig's .DAT file. " +
-      "A cyclic-flow (ISO 23369) test also needs its matching \"-Cyclic.DAT\" companion " +
-      "file — you'll be prompted for it automatically once a cyclic file loads."),
+    el("p", {}, "The \"Load File\" button (File, top left) accepts the rig's .DAT file, " +
+      "or a previously saved report (.json) — it figures out which from the file " +
+      "itself, so there's one button for both. A cyclic-flow (ISO 23369) test also " +
+      "needs its matching \"-Cyclic.DAT\" companion file — you'll be prompted for it " +
+      "automatically once a cyclic file loads."),
 
     el("h4", { class: "mp-subhead" }, "2. Data File Explorer"),
     el("p", {}, "Inspect the raw contents of whatever's loaded: header info, analog " +
       "channels, particle counts. Build your own plot tabs (\"+ Add Plot Tab\") to " +
-      "overlay any channels you want to look at, independent of any standard."),
+      "overlay any channels you want to look at, independent of any standard. " +
+      "Save/Load chart tabs (Actions) to reuse the same set later, or on a different file."),
 
     el("h4", { class: "mp-subhead" }, "3. Standard Report"),
-    el("p", {}, "Pick a standard from the sidebar; the report fills in automatically " +
-      "from the loaded file. Fields highlighted on double-click are physical specs the " +
-      ".DAT file can't supply (Element ID, Housing ID, etc.) — enter them by hand; " +
-      "they're remembered as defaults for next time. Switch standards at any point, " +
-      "even with a file loaded, to see how the same data reports under a different one."),
+    el("p", {}, "Pick a standard from the Mode section; the report fills in automatically " +
+      "from the loaded file. Once a file's loaded, \"Report Options\" (under Standard " +
+      "Report) holds sensor/size/gravimetric and similar per-standard choices. Fields " +
+      "with a pencil (✎) are physical specs the .DAT file can't supply (Element ID, " +
+      "Housing ID, etc.) — click the pencil to enter them by hand; they're remembered " +
+      "as defaults for next time. Switch standards at any point, even with a file " +
+      "loaded, to see how the same data reports under a different one."),
 
     el("h4", { class: "mp-subhead" }, "4. Compare Files"),
     el("p", {}, "A second, independent set of loaded files, for looking at several " +
       "tests side by side. Nothing here affects, or is affected by, what's open in " +
-      "Explorer or Report."),
+      "Explorer or Report. Still evolving (BETA) as real usage shapes what it needs."),
 
     el("h4", { class: "mp-subhead" }, "5. Machine Profiles"),
-    el("p", {}, "Save per-rig defaults (counter/sensor identity, calibration info, " +
-      "test location), keyed by the .DAT file's own Serial Number. Once saved, a file " +
-      "from that rig fills these in automatically. Save/load the whole directory as " +
-      "one file to share the same settings across multiple terminals."),
+    el("p", {}, "Under Configuration. Save per-rig defaults (counter/sensor identity, " +
+      "calibration info, test location), keyed by the .DAT file's own Serial Number. " +
+      "Once saved, a file from that rig fills these in automatically. Save/load the " +
+      "whole directory as one file to share the same settings across multiple terminals."),
 
     el("h4", { class: "mp-subhead" }, "Other things worth knowing"),
-    el("p", {}, "Save/Load session (.json) to pick a report back up later; the SI/US " +
-      "unit toggle and paper size (sidebar, bottom) apply everywhere; Print report " +
-      "uses whichever paper size is selected."),
+    el("p", {}, "Save Report to pick things back up later (Actions, while viewing a " +
+      "Standard Report) — Load File (File, top left) reads it back the same way it " +
+      "reads a .DAT file. Units, Paper size, and Report Logo (Configuration) apply " +
+      "everywhere; Print Report uses whichever paper size is selected."),
 
     el("div", { class: "modal-actions" },
       el("button", { class: "act primary", onclick: close }, "Close"))
@@ -63,6 +69,53 @@ export function openHelpDialog() {
 
   function close() { overlay.remove(); }
   overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+}
+//#endregion
+
+//#region version info dialog
+/* openVersionInfoDialog: this project has no formal semver (see CHANGELOG.md's own
+   note) — service-worker.js's CACHE_NAME is the one real version marker, bumped
+   whenever a precached file changes. Rather than duplicating that string as a
+   second constant here (guaranteed to drift the moment someone bumps one and
+   forgets the other), this reads it live from the Cache Storage entry the service
+   worker itself created on activation (caches.open(CACHE_NAME) in
+   service-worker.js) — single source of truth, always reflects whatever's ACTUALLY
+   active, not a guess. Populated async: the dialog opens immediately with a
+   "Checking..." placeholder, filled in once caches.keys() resolves. No cache
+   found (service worker never registered — not served over http/https, or
+   registration failed) reports that plainly rather than showing nothing. */
+export function openVersionInfoDialog() {
+  const versionRow = el("p", {}, el("b", {}, "Cache version: "), "Checking…");
+
+  const dialog = el("div", { class: "modal-box help-dialog" },
+    el("h3", {}, "Version Info"),
+    el("p", {}, el("b", {}, "Application: "), "WebReportWriter"),
+    versionRow,
+    el("div", { class: "modal-actions" },
+      el("button", { class: "act primary", onclick: close }, "Close"))
+  );
+
+  const overlay = el("div", { class: "modal-overlay" }, dialog);
+  document.body.appendChild(overlay);
+
+  function close() { overlay.remove(); }
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+
+  if ("caches" in window) {
+    caches.keys()
+      .then(names => names.find(n => n.startsWith("webreportwriter-")))
+      .then(name => {
+        versionRow.textContent = "";
+        versionRow.append(el("b", {}, "Cache version: "), name || "Not available (offline caching isn't active this session)");
+      })
+      .catch(() => {
+        versionRow.textContent = "";
+        versionRow.append(el("b", {}, "Cache version: "), "Not available");
+      });
+  } else {
+    versionRow.textContent = "";
+    versionRow.append(el("b", {}, "Cache version: "), "Not available");
+  }
 }
 //#endregion
 

@@ -58,21 +58,28 @@ export function renderMachineProfilesView(container, profiles, { onSave, onDelet
     formMount
   );
 
+  // Wrapped in a scrolling container, same "wide table gets its own overflow-x:auto
+  // wrapper" pattern already established for the audit trail's tables
+  // (auditView.js's .audit-table-wrap) and ISO 16889/23369's page-2 rotated tables
+  // — a rig with a full Counter/Sensor/LS/LBE summary plus Cal Method/Date can run
+  // wider than the content column; scroll rather than silently clip.
   function buildTable(rows) {
-    return el("table", { class: "datatbl mp-list" },
-      el("thead", {}, el("tr", {},
-        el("th", {}, "Serial Number"), el("th", {}, "Label"), el("th", {}, "Test Location"),
-        el("th", {}, "Counter / Sensor"), el("th", {}, "Cal Method / Date"), el("th", {}, ""))),
-      el("tbody", {}, ...rows.map(([serial, p]) => el("tr", {},
-        el("td", {}, serial),
-        el("td", {}, p.label || ""),
-        el("td", {}, p.testLocation || ""),
-        el("td", {}, summarize(p)),
-        el("td", {}, [p.counterCalMethod, p.counterCalDate].filter(Boolean).join(" / ")),
-        el("td", { class: "mp-actions" },
-          el("button", { class: "act", onclick: () => showForm(serial) }, "Edit"),
-          el("button", { class: "act", onclick: () => onDelete(serial) }, "Delete"))
-      )))
+    return el("div", { class: "mp-table-wrap" },
+      el("table", { class: "datatbl mp-list" },
+        el("thead", {}, el("tr", {},
+          el("th", {}, "Serial Number"), el("th", {}, "Label"), el("th", {}, "Test Location"),
+          el("th", {}, "Counter / Sensor"), el("th", {}, "Cal Method / Date"), el("th", {}, ""))),
+        el("tbody", {}, ...rows.map(([serial, p]) => el("tr", {},
+          el("td", {}, serial),
+          el("td", {}, p.label || ""),
+          el("td", {}, p.testLocation || ""),
+          el("td", {}, summarize(p)),
+          el("td", {}, [p.counterCalMethod, p.counterCalDate].filter(Boolean).join(" / ")),
+          el("td", { class: "mp-actions" },
+            el("button", { class: "act", onclick: () => showForm(serial) }, "Edit"),
+            el("button", { class: "act", onclick: () => onDelete(serial) }, "Delete"))
+        )))
+      )
     );
   }
 
